@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paracosm — Offline System Space</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Paracosm</h1>
+    <p>Offline, private internal system workspace</p>
+    <div class="header-actions">
+      <button id="exportBtn">Export</button>
+      <label class="file-input-label" for="importFile">Import</label>
+      <input id="importFile" type="file" accept="application/json" />
+      <button id="backupBtn">Backup Snapshot</button>
+      <button id="toggleLowStimBtn">Low Stimulation</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <section class="card">
+        <h2>System Profile</h2>
+        <form id="systemForm" class="form-grid">
+          <label>Name<input name="name" required /></label>
+          <label>Pronouns<input name="pronouns" /></label>
+          <label>Shared Roles<input name="roles" placeholder="caretaker, protector" /></label>
+          <label>Theme Color<input name="color" type="color" value="#6c8cff" /></label>
+          <label>Notes<textarea name="notes" rows="3"></textarea></label>
+          <button type="submit">Save Profile</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Fast Alter Switch</h2>
+        <select id="frontSelect"></select>
+        <button id="setFrontBtn">Set Front</button>
+        <div id="currentFront"></div>
+      </section>
+
+      <section class="card">
+        <h2>Grounding Tools</h2>
+        <ul>
+          <li>5-4-3-2-1 sensory check</li>
+          <li>60-second breathing prompt</li>
+          <li>Hydration reminder</li>
+        </ul>
+      </section>
+    </aside>
+
+    <section class="content">
+      <nav class="tabs" id="tabs"></nav>
+      <div id="tabContent"></div>
+    </section>
+  </main>
+
+  <template id="alterCardTemplate">
+    <article class="alter-card">
+      <header>
+        <h3></h3><span class="tag"></span>
+      </header>
+      <p class="meta"></p>
+      <p class="notes"></p>
+      <div class="actions">
+        <button class="edit">Edit</button>
+        <button class="delete">Delete</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
