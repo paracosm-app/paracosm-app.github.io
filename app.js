@@ -1,177 +1,43 @@
-const STORAGE_KEY = "paracosm_state_v1";
+const STORAGE_KEY = 'paracosm_v2';
+const SPACES = ['dashboard','alters','fronting','board','journal','innerworld','vault','safety','settings'];
+let activeSpace='dashboard';
+let state=load();
 
-const defaultState = {
-  settings: { lowStim: false, blurTriggers: true },
-  system: { name: "", pronouns: "", roles: "", color: "#6c8cff", notes: "" },
-  alters: [],
-  frontLog: [],
-  messages: [],
-  journal: [],
-  innerworld: [],
-  memoryVault: [],
-  reminders: []
-};
+function defaults(){return{system:{name:'',pronouns:'',notes:'',color:'#e94560'},activeAlterId:'',alters:[],frontLog:[],board:[],journal:[],innerworld:[],vault:[],safety:{blur:true,lowStim:false}}}
+function load(){try{return {...defaults(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return defaults()}}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+const id=()=>crypto.randomUUID(); const now=()=>new Date().toISOString();
+const esc=s=>{const d=document.createElement('div');d.textContent=s||'';return d.innerHTML};
 
-let state = loadState();
-let activeTab = "alters";
+function render(){renderAlterSelect();renderSpaces();renderHeader();renderWorkspace();document.body.style.filter=state.safety.lowStim?'saturate(.8) contrast(.95)':'none'}
+function renderAlterSelect(){const el=document.getElementById('activeAlterSelect');el.innerHTML='<option value="">-- Active front --</option>'+state.alters.map(a=>`<option ${a.id===state.activeAlterId?'selected':''} value="${a.id}">${esc(a.name)}</option>`).join('')}
+function renderSpaces(){const el=document.getElementById('spaceList');el.innerHTML=SPACES.map(s=>`<div class="board-item ${s===activeSpace?'active':''}" data-space="${s}"><span>${s}</span><span>›</span></div>`).join('');el.querySelectorAll('.board-item').forEach(n=>n.onclick=()=>{activeSpace=n.dataset.space;render();closeSidebar();});}
+function renderHeader(){document.getElementById('headerTitle').textContent=activeSpace[0].toUpperCase()+activeSpace.slice(1);document.getElementById('headerSub').textContent='Everything is local-only. Export regularly for backups.'}
 
-const tabs = ["alters", "front", "board", "journal", "innerworld", "vault", "insights", "safety"];
+function addForm(fields,submitText,onSubmit){return `<form class="card" onsubmit="${onSubmit}(event)">${fields.map(f=>`<label>${f}<input name="${f}" /></label>`).join('')}<button>${submitText}</button></form>`}
 
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-function loadState() {
-  try { return { ...defaultState, ...JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") }; }
-  catch { return structuredClone(defaultState); }
+function renderWorkspace(){const w=document.getElementById('workspace');
+if(activeSpace==='dashboard'){w.innerHTML=`<div class="cards"><div class="card"><h3>System</h3><p>${esc(state.system.name||'Unnamed System')}</p><p>${esc(state.system.notes||'No notes yet')}</p></div><div class="card"><h3>Insights</h3><p>Alters: ${state.alters.length}</p><p>Front logs: ${state.frontLog.length}</p><p>Journal entries: ${state.journal.length}</p></div></div>`;return}
+if(activeSpace==='alters'){w.innerHTML=`<div class="cards"><form class="card" id="alterForm"><h3>Add Alter</h3><input name="name" placeholder="Name" required/><input name="pronouns" placeholder="Pronouns"/><input name="role" placeholder="Role"/><input name="color" type="color" value="#e94560"/><textarea name="notes" placeholder="Notes"></textarea><button>Add</button></form>${state.alters.map(a=>`<div class="card"><h3>${esc(a.name)}</h3><p>${esc(a.pronouns||'')}</p><p>${esc(a.role||'')}</p><button onclick="delAlter('${a.id}')">Delete</button></div>`).join('')}</div>`;document.getElementById('alterForm').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target).entries());state.alters.push({id:id(),...v});save();render()};return}
+if(activeSpace==='fronting'){w.innerHTML=`<div class="cards"><form class="card" id="frontForm"><h3>Log Front</h3><select name="alterId">${state.alters.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('')}</select><input name="duration" placeholder="Duration minutes"/><textarea name="notes" placeholder="Notes"></textarea><button>Save</button></form>${state.frontLog.slice().reverse().map(f=>`<div class="card"><p>${new Date(f.time).toLocaleString()}</p><p>${esc(findAlter(f.alterId)?.name||'Unknown')}</p><p>${esc(f.notes||'')}</p></div>`).join('')}</div>`;document.getElementById('frontForm').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target).entries());state.frontLog.push({id:id(),time:now(),...v});save();render()};return}
+const map={board:'message',journal:'entry',innerworld:'location',vault:'item'};if(map[activeSpace]){const key=activeSpace;w.innerHTML=`<div class="cards"><form class="card" id="genericForm"><h3>Add ${key}</h3><input name="title" placeholder="Title / tag"/><textarea name="text" placeholder="Write..."></textarea><button>Add</button></form>${state[key].slice().reverse().map(x=>`<div class="card"><p>${new Date(x.time).toLocaleString()}</p><h4>${esc(x.title||'')}</h4><p class="${state.safety.blur&&/trigger/i.test(x.text||'')?'blur':''}">${esc(x.text||'')}</p></div>`).join('')}</div>`;document.getElementById('genericForm').onsubmit=e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target).entries());state[key].push({id:id(),time:now(),...v});save();render()};return}
+if(activeSpace==='safety'){w.innerHTML=`<div class="cards"><div class="card"><h3>Safety</h3><label><input type="checkbox" id="blurT" ${state.safety.blur?'checked':''}/> Blur trigger text</label><label><input type="checkbox" id="stimT" ${state.safety.lowStim?'checked':''}/> Low stimulation</label></div></div>`;document.getElementById('blurT').onchange=e=>{state.safety.blur=e.target.checked;save();render()};document.getElementById('stimT').onchange=e=>{state.safety.lowStim=e.target.checked;save();render()};return}
+if(activeSpace==='settings'){w.innerHTML=`<div class="cards"><form class="card" id="sysForm"><h3>System profile</h3><input name="name" value="${esc(state.system.name)}" placeholder="System name"/><input name="pronouns" value="${esc(state.system.pronouns)}" placeholder="Pronouns"/><input type="color" name="color" value="${state.system.color}"/><textarea name="notes" placeholder="Shared notes">${esc(state.system.notes)}</textarea><button>Save</button></form></div>`;document.getElementById('sysForm').onsubmit=e=>{e.preventDefault();state.system=Object.fromEntries(new FormData(e.target).entries());save();render()};}
 }
+function findAlter(i){return state.alters.find(a=>a.id===i)}
+function delAlter(i){state.alters=state.alters.filter(a=>a.id!==i);if(state.activeAlterId===i)state.activeAlterId='';save();render()}
+function exportData(){const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`paracosm-export-${Date.now()}.json`;a.click()}
+function importData(file){const r=new FileReader();r.onload=()=>{try{state={...defaults(),...JSON.parse(r.result)};save();render();alert('Import complete')}catch{alert('Invalid file')}};r.readAsText(file)}
+function quickPin(){const txt=document.getElementById('quickInput');if(!txt.value.trim())return;state.board.push({id:id(),time:now(),title:findAlter(state.activeAlterId)?.name||'System',text:txt.value.trim()});txt.value='';save();if(activeSpace!=='board')activeSpace='board';render()}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('mobileOverlay').classList.add('hidden')}
 
-function uid() { return crypto.randomUUID(); }
-function now() { return new Date().toISOString(); }
-function download(name, payload) {
-  const blob = new Blob([payload], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob); a.download = name; a.click();
-}
-
-function renderTabs() {
-  const el = document.getElementById("tabs");
-  el.innerHTML = "";
-  tabs.forEach((t) => {
-    const b = document.createElement("button");
-    b.textContent = t;
-    b.className = t === activeTab ? "active" : "";
-    b.onclick = () => { activeTab = t; render(); };
-    el.appendChild(b);
-  });
-}
-
-function render() {
-  document.body.classList.toggle("low-stim", state.settings.lowStim);
-  renderTabs(); renderSystem(); renderFrontPicker(); renderCurrentFront();
-  const c = document.getElementById("tabContent");
-  c.innerHTML = "";
-  if (activeTab === "alters") c.append(renderAlters());
-  if (activeTab === "front") c.append(renderFront());
-  if (activeTab === "board") c.append(renderBoard());
-  if (activeTab === "journal") c.append(renderJournal());
-  if (activeTab === "innerworld") c.append(renderInnerworld());
-  if (activeTab === "vault") c.append(renderVault());
-  if (activeTab === "insights") c.append(renderInsights());
-  if (activeTab === "safety") c.append(renderSafety());
-}
-
-function renderSystem() {
-  const form = document.getElementById("systemForm");
-  Object.entries(state.system).forEach(([k,v]) => form.elements[k].value = v || "");
-}
-
-function renderFrontPicker() {
-  const s = document.getElementById("frontSelect");
-  s.innerHTML = state.alters.map(a=>`<option value="${a.id}">${a.name}</option>`).join("");
-}
-
-function renderCurrentFront() {
-  const last = state.frontLog.at(-1);
-  const name = state.alters.find(a=>a.id===last?.alterId)?.name || "None";
-  document.getElementById("currentFront").textContent = `Current Front: ${name}`;
-}
-
-function addQuickForm(fields, onSubmitText, onSubmit) {
-  const form = document.createElement("form"); form.className = "card form-grid";
-  form.innerHTML = fields.map(f => `<label>${f.label}<${f.type||"input"} name="${f.name}" ${f.attrs||""}></${f.type||"input"}></label>`).join("") + `<button>${onSubmitText}</button>`;
-  form.onsubmit = (e) => { e.preventDefault(); const fd = Object.fromEntries(new FormData(form).entries()); onSubmit(fd); form.reset(); };
-  return form;
-}
-
-function renderAlters() {
-  const wrap = document.createElement("section");
-  wrap.append(addQuickForm([
-    {name:"name",label:"Name",attrs:"required"},{name:"pronouns",label:"Pronouns"},{name:"role",label:"Role"},{name:"trigger",label:"Triggers"},{name:"preferences",label:"Preferences"},{name:"color",label:"Color",attrs:'type="color" value="#6c8cff"'},{name:"notes",label:"Notes",type:"textarea"}
-  ], "Add Alter", (v)=>{ state.alters.push({id:uid(), ...v}); saveState(); render(); }));
-  const grid = document.createElement("div"); grid.className = "grid";
-  state.alters.forEach(a => {
-    const t = document.getElementById("alterCardTemplate").content.cloneNode(true);
-    t.querySelector("h3").textContent = a.name;
-    t.querySelector(".tag").textContent = a.role || "alter";
-    t.querySelector(".tag").style.background = a.color || "#6c8cff";
-    t.querySelector(".meta").textContent = `${a.pronouns || ""} • ${a.preferences || ""}`;
-    const notes = t.querySelector(".notes"); notes.textContent = a.notes || "";
-    if (state.settings.blurTriggers && a.trigger) notes.classList.add("warning");
-    t.querySelector(".delete").onclick = ()=>{ state.alters = state.alters.filter(x=>x.id!==a.id); saveState(); render(); };
-    t.querySelector(".edit").onclick = ()=> alert("Edit can be done by deleting and recreating for this demo.");
-    grid.append(t);
-  });
-  wrap.append(grid); return wrap;
-}
-
-function renderFront() {
-  const wrap = document.createElement("section");
-  wrap.append(addQuickForm([{name:"alterId",label:"Alter Id"},{name:"cofront",label:"Co-front IDs"},{name:"duration",label:"Duration (min)"},{name:"notes",label:"Notes",type:"textarea"}], "Log Front", (v)=>{ state.frontLog.push({id:uid(), time:now(), ...v}); saveState(); render(); }));
-  const list = document.createElement("div"); list.className = "list";
-  state.frontLog.slice().reverse().forEach(f => {
-    const item = document.createElement("div"); item.className = "item";
-    const alterName = state.alters.find(a=>a.id===f.alterId)?.name || f.alterId;
-    item.textContent = `${new Date(f.time).toLocaleString()} — ${alterName} (${f.duration||"?"}m) ${f.notes||""}`;
-    list.append(item);
-  });
-  wrap.append(list); return wrap;
-}
-
-const boardRenderer = (key, fields, label) => {
-  const wrap = document.createElement("section");
-  wrap.append(addQuickForm(fields, `Add ${label}`, (v)=>{ state[key].push({id:uid(), time:now(), ...v}); saveState(); render(); }));
-  const list = document.createElement("div"); list.className = "list";
-  state[key].slice().reverse().forEach(m=>{ const d=document.createElement("div"); d.className="item"; d.textContent=`${new Date(m.time).toLocaleString()} — ${Object.values(m).filter(Boolean).slice(2).join(" | ")}`; list.append(d); });
-  wrap.append(list); return wrap;
-};
-
-function renderBoard(){ return boardRenderer("messages", [{name:"from",label:"From Alter"},{name:"thread",label:"Thread"},{name:"message",label:"Message",type:"textarea"}], "Message"); }
-function renderJournal(){ return boardRenderer("journal", [{name:"alter",label:"Alter or System"},{name:"mood",label:"Mood"},{name:"tags",label:"Tags"},{name:"entry",label:"Entry",type:"textarea"}], "Journal Entry"); }
-function renderInnerworld(){ return boardRenderer("innerworld", [{name:"location",label:"Location"},{name:"assigned",label:"Assigned Alters"},{name:"memory",label:"Associated Note",type:"textarea"}], "Location"); }
-function renderVault(){ return boardRenderer("memoryVault", [{name:"title",label:"Title"},{name:"tags",label:"Tags"},{name:"content",label:"Secure Text",type:"textarea"}], "Vault Item"); }
-
-function renderInsights(){
-  const s = document.createElement("section"); s.className = "card";
-  const countByAlter = state.frontLog.reduce((acc, x)=>{acc[x.alterId]=(acc[x.alterId]||0)+1; return acc;},{});
-  const lines = Object.entries(countByAlter).map(([id,c])=>`${state.alters.find(a=>a.id===id)?.name||id}: ${c}`).join("\n") || "No front data yet.";
-  s.innerHTML = `<h2>Pattern Insights</h2><pre>${lines}</pre><p>Total journal entries: ${state.journal.length}</p>`;
-  return s;
-}
-
-function renderSafety(){
-  const s = document.createElement("section"); s.className = "card";
-  s.innerHTML = `<h2>Safety & Accessibility</h2>
-  <label><input type="checkbox" id="blurToggle" ${state.settings.blurTriggers?"checked":""}/> Blur trigger-related note blocks</label>
-  <p>Use low stimulation mode from the header for reduced visual load.</p>`;
-  setTimeout(()=>document.getElementById("blurToggle").onchange=(e)=>{state.settings.blurTriggers=e.target.checked; saveState(); render();},0);
-  return s;
-}
-
-document.getElementById("systemForm").onsubmit = (e)=>{
-  e.preventDefault();
-  state.system = Object.fromEntries(new FormData(e.target).entries());
-  saveState(); render();
-};
-
-document.getElementById("setFrontBtn").onclick = ()=>{
-  const alterId = document.getElementById("frontSelect").value;
-  if (!alterId) return;
-  state.frontLog.push({ id: uid(), time: now(), alterId, duration: "", notes: "fast switch" });
-  saveState(); render();
-};
-
-document.getElementById("toggleLowStimBtn").onclick = ()=>{ state.settings.lowStim = !state.settings.lowStim; saveState(); render(); };
-document.getElementById("exportBtn").onclick = ()=> download(`paracosm-export-${Date.now()}.json`, JSON.stringify(state, null, 2));
-document.getElementById("backupBtn").onclick = ()=> download(`paracosm-backup-${Date.now()}.json`, JSON.stringify({snapshotAt:now(), state}, null, 2));
-document.getElementById("importFile").onchange = (e)=>{
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const imported = JSON.parse(reader.result);
-      state = imported.state ? imported.state : imported;
-      saveState(); render(); alert("Import complete.");
-    } catch { alert("Invalid import file."); }
-  };
-  reader.readAsText(file);
-};
-
+document.getElementById('activeAlterSelect').onchange=e=>{state.activeAlterId=e.target.value;save();render()};
+document.getElementById('exportBtn').onclick=exportData;
+document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange=e=>e.target.files[0]&&importData(e.target.files[0]);
+document.getElementById('quickSendBtn').onclick=quickPin;
+document.getElementById('quickFrontBtn').onclick=()=>{if(!state.activeAlterId)return alert('Select active alter first');state.frontLog.push({id:id(),time:now(),alterId:state.activeAlterId,duration:'',notes:'Quick front log'});save();activeSpace='fronting';render()};
+document.getElementById('openSidebarBtn').onclick=()=>{document.getElementById('sidebar').classList.add('open');document.getElementById('mobileOverlay').classList.remove('hidden')};
+document.getElementById('mobileOverlay').onclick=closeSidebar;
+document.getElementById('addAlterBtn').onclick=()=>{activeSpace='alters';render()};
 render();
