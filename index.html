@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Paracosm</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="mobile-overlay hidden" id="mobileOverlay"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1>🌌 Paracosm</h1>
+    <select id="activeAlterSelect" class="profile-selector"></select>
+  </div>
+  <div class="section-label">Spaces</div>
+  <div id="spaceList" class="board-list"></div>
+  <div class="sidebar-footer">
+    <button id="addAlterBtn">+ Alter</button>
+    <button id="importBtn">Import</button>
+    <button id="exportBtn">Export</button>
+    <input type="file" id="importFile" accept="application/json" hidden />
+  </div>
+</aside>
+
+<main class="main">
+  <header class="main-header">
+    <button class="hamburger" id="openSidebarBtn">☰</button>
+    <div class="avatar" id="headerAvatar">🌌</div>
+    <div class="header-info">
+      <h2 id="headerTitle">Paracosm</h2>
+      <p id="headerSub">private, offline internal environment</p>
+    </div>
+    <button id="quickFrontBtn">Log Front</button>
+  </header>
+  <section id="workspace" class="board-area"></section>
+  <footer class="compose" id="composer">
+    <textarea id="quickInput" placeholder="Quick note..."></textarea>
+    <button id="quickSendBtn" class="send-btn">Pin</button>
+  </footer>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
