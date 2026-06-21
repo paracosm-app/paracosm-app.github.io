@@ -642,7 +642,7 @@
   }
 
   .stat-card {
-   background: var(--surface-2);
+   background: var(--bg-2);
    border-radius: 12px;
    padding: 12px;
    text-align: center;
@@ -662,7 +662,7 @@
    margin-top: 10px;
    padding: 12px;
    border-radius: 12px;
-   background: var(--surface-2);
+   background: var(--bg-2);
   }.custom-fields-list {
  display: flex;
  flex-direction: column;
@@ -677,18 +677,76 @@
  padding: 12px;
  border-radius: 12px;
 
- background: var(--surface-2);
- }.sidebar-item-name {
- display: flex;
- align-items: center;
- width: 100%;
+ background: var(--bg-2);
  }
 
  .board-move-buttons {
  margin-left: auto;
  display: flex;
  gap: 2px;
+ flex-shrink: 0;
+ opacity: 0.5;
+ transition: opacity var(--transition);
  }
+ .sidebar-item:hover .board-move-buttons,
+ .sidebar-item:focus-within .board-move-buttons { opacity: 1; }
+
+ /* ============================================================
+   BOARD CATEGORIES
+  ============================================================ */
+ .category-block { margin-bottom: 2px; }
+ .category-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 6px; padding: 8px 10px 4px 16px; cursor: grab; border-radius: var(--radius-sm);
+  user-select: none;
+ }
+ .category-header:active { cursor: grabbing; }
+ .category-header:hover .category-actions { opacity: 1; }
+ .category-header.dragging { opacity: 0.4; }
+ .category-header.drag-over {
+  box-shadow: inset 0 2px 0 var(--accent);
+ }
+ .category-toggle {
+  display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0;
+  background: none; border: none; cursor: pointer; padding: 0;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-2); font-family: inherit;
+ }
+ .category-caret {
+  display: inline-block; transition: transform var(--transition); flex-shrink: 0;
+  font-size: 0.7rem;
+ }
+ .category-caret.collapsed { transform: rotate(-90deg); }
+ .category-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+ .category-actions { display: flex; gap: 2px; opacity: 0.5; transition: opacity var(--transition); flex-shrink: 0; }
+ .category-boards { display: flex; flex-direction: column; min-height: 4px; }
+ .category-boards.collapsed { display: none; }
+ .category-boards.drag-over {
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+  border-radius: var(--radius-sm);
+ }
+ .category-empty {
+  margin: 2px 16px 8px 28px; padding: 8px 10px;
+  border: 1.5px dashed var(--border); border-radius: var(--radius-sm);
+  font-size: 0.74rem; color: var(--text-2); text-align: center;
+ }
+ .sidebar-item.dragging { opacity: 0.4; }
+ .sidebar-item.drag-over-top { box-shadow: inset 0 2px 0 var(--accent); }
+ .sidebar-item.drag-over-bottom { box-shadow: inset 0 -2px 0 var(--accent); }
+.post.comment {
+    margin-left: 40px; /* Indent the comment */
+    margin-top: 5px;
+    border-left: 2px solid var(--border); /* Optional: visual connection */
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background: var(--bg-2); /* Slightly different background color */
+    border-radius: 0 var(--radius) var(--radius) 0;
+}/* Add to your CSS */
+.post.is-reply {
+    margin-left: 24px; /* Indent the reply */
+    border-left: 2px solid var(--accent); /* Visual link to parent */
+    padding-left: 12px;
+}
  </style>
  </head>
  <body>
@@ -1123,7 +1181,7 @@
    currentBoardId: null,
 
   };
- state.categories = [{ id: crypto.randomUUID(), name: "Journaling" }];
+ state.categories = [{ id: 'cat-general', name: 'General', order: 0, collapsed: false }];
 
 
   let currentView = 'alters'; // 'alters' | 'board' | 'settings'
@@ -1200,47 +1258,57 @@
   /* ============================================================
    THEME
   ============================================================ */
+  /* ============================================================
+   CATEGORY HELPERS
+  ============================================================ */
+  function getCategory(id) { return state.categories.find(c => c.id === id); }
+
+  function sortedCategories() {
+   return [...state.categories].sort((a, b) => (a.order || 0) - (b.order || 0));
+  }
+
+  // categoryId === null means "no category" (top-level boards)
+  function boardsForCategory(categoryId) {
+   return state.boards
+    .filter(b => !b.archived && (b.categoryId || null) === (categoryId || null))
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+  }
+
+  function reindexCategories() {
+   sortedCategories().forEach((c, i) => { c.order = i; });
+  }
+
+  function reindexBoardList(list) {
+   list.forEach((b, i) => { b.order = i; });
+  }
+
   function moveCategoryUp(categoryId) {
- const index =
- state.categories.findIndex(
- c => c.id === categoryId
- );
+   const cats = sortedCategories();
+   const idx = cats.findIndex(c => c.id === categoryId);
+   if (idx <= 0) return;
+   [cats[idx - 1], cats[idx]] = [cats[idx], cats[idx - 1]];
+   cats.forEach((c, i) => { c.order = i; });
+   saveState();
+   renderSidebar();
+  }
 
- if (index <= 0) return;
+  function moveCategoryDown(categoryId) {
+   const cats = sortedCategories();
+   const idx = cats.findIndex(c => c.id === categoryId);
+   if (idx === -1 || idx >= cats.length - 1) return;
+   [cats[idx], cats[idx + 1]] = [cats[idx + 1], cats[idx]];
+   cats.forEach((c, i) => { c.order = i; });
+   saveState();
+   renderSidebar();
+  }
 
- [
- state.categories[index],
- state.categories[index - 1]
- ] = [
- state.categories[index - 1],
- state.categories[index]
- ];
-
- saveState();
- renderSidebar();
- }
- function moveCategoryDown(categoryId) {
- const index =
- state.categories.findIndex(
- c => c.id === categoryId
- );
-
- if (
- index === -1 ||
- index >= state.categories.length - 1
- ) return;
-
- [
- state.categories[index],
- state.categories[index + 1]
- ] = [
- state.categories[index + 1],
- state.categories[index]
- ];
-
- saveState();
- renderSidebar();
- }
+  function toggleCategoryCollapse(categoryId) {
+   const cat = getCategory(categoryId);
+   if (!cat) return;
+   cat.collapsed = !cat.collapsed;
+   saveState();
+   renderSidebar();
+  }
  function applyTheme() {
    const root = document.documentElement;
    const s = state.settings;
@@ -1375,44 +1443,146 @@
    SIDEBAR BOARDS
   ============================================================ */
   function moveBoardUp(boardId) {
- const index = state.boards.findIndex(
- b => b.id === boardId
- );
+   const board = getBoard(boardId);
+   if (!board) return;
+   const list = boardsForCategory(board.categoryId);
+   const idx = list.findIndex(b => b.id === boardId);
+   if (idx <= 0) return;
+   [list[idx - 1], list[idx]] = [list[idx], list[idx - 1]];
+   reindexBoardList(list);
+   saveState();
+   renderSidebar();
+  }
+  function moveBoardDown(boardId) {
+   const board = getBoard(boardId);
+   if (!board) return;
+   const list = boardsForCategory(board.categoryId);
+   const idx = list.findIndex(b => b.id === boardId);
+   if (idx === -1 || idx >= list.length - 1) return;
+   [list[idx], list[idx + 1]] = [list[idx + 1], list[idx]];
+   reindexBoardList(list);
+   saveState();
+   renderSidebar();
+  }
 
- if (index <= 0) return;
+  /* ============================================================
+   DRAG & DROP — boards + categories
+  ============================================================ */
+  let draggedBoardId = null;
+  let draggedCategoryId = null;
 
- [
- state.boards[index],
- state.boards[index - 1]
- ] = [
- state.boards[index - 1],
- state.boards[index]
- ];
+  function onBoardDragStart(e, boardId) {
+   draggedBoardId = boardId;
+   draggedCategoryId = null;
+   e.dataTransfer.effectAllowed = 'move';
+   e.dataTransfer.setData('text/plain', boardId); // Firefox needs data set to allow drag
+   e.currentTarget.classList.add('dragging');
+  }
 
- saveState();
- renderSidebar();
- }
- function moveBoardDown(boardId) {
- const index = state.boards.findIndex(
- b => b.id === boardId
- );
+  function onBoardDragOver(e) {
+   if (!draggedBoardId) return;
+   e.preventDefault();
+   e.dataTransfer.dropEffect = 'move';
+   const rect = e.currentTarget.getBoundingClientRect();
+   const after = (e.clientY - rect.top) > rect.height / 2;
+   e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom');
+   e.currentTarget.classList.add(after ? 'drag-over-bottom' : 'drag-over-top');
+  }
 
- if (
- index === -1 ||
- index >= state.boards.length - 1
- ) return;
+  function onBoardDragLeave(e) {
+   e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom');
+  }
 
- [
- state.boards[index],
- state.boards[index + 1]
- ] = [
- state.boards[index + 1],
- state.boards[index]
- ];
+  // Dropped onto a specific board row — insert before/after it depending on which
+  // half of the row the cursor is over, within the target's category.
+  function onBoardDrop(e, targetCategoryId, targetBoardId) {
+   e.preventDefault();
+   e.stopPropagation();
+   const dropEl = e.currentTarget;
+   const insertAfter = dropEl.classList.contains('drag-over-bottom');
+   dropEl.classList.remove('drag-over-top', 'drag-over-bottom');
+   if (!draggedBoardId || draggedBoardId === targetBoardId) return;
 
- saveState();
- renderSidebar();
- }
+   const dragged = getBoard(draggedBoardId);
+   if (!dragged) return;
+
+   dragged.categoryId = targetCategoryId || null;
+
+   const list = boardsForCategory(targetCategoryId).filter(b => b.id !== draggedBoardId);
+   let targetIdx = list.findIndex(b => b.id === targetBoardId);
+   if (targetIdx === -1) targetIdx = list.length;
+   else if (insertAfter) targetIdx += 1;
+   list.splice(targetIdx, 0, dragged);
+   reindexBoardList(list);
+
+   saveState();
+   renderSidebar();
+  }
+
+  // Dropped onto empty space within a category's board list (not on a specific board) — append to end
+  function onCategoryDropZone(e, categoryId) {
+   e.preventDefault();
+   e.currentTarget.classList.remove('drag-over');
+   if (!draggedBoardId) return;
+
+   const dragged = getBoard(draggedBoardId);
+   if (!dragged) return;
+
+   dragged.categoryId = categoryId || null;
+   const list = boardsForCategory(categoryId).filter(b => b.id !== draggedBoardId);
+   list.push(dragged);
+   reindexBoardList(list);
+
+   saveState();
+   renderSidebar();
+  }
+
+  function onCategoryDragStart(e, categoryId) {
+   draggedCategoryId = categoryId;
+   draggedBoardId = null;
+   e.dataTransfer.effectAllowed = 'move';
+   e.dataTransfer.setData('text/plain', categoryId);
+   e.currentTarget.classList.add('dragging');
+  }
+
+  function onCategoryDragOver(e) {
+   if (!draggedCategoryId) return;
+   e.preventDefault();
+   e.dataTransfer.dropEffect = 'move';
+   e.currentTarget.classList.add('drag-over');
+  }
+
+  function onCategoryDragLeave(e) {
+   e.currentTarget.classList.remove('drag-over');
+  }
+
+  function onCategoryDrop(e, targetCategoryId) {
+   e.preventDefault();
+   e.stopPropagation();
+   e.currentTarget.classList.remove('drag-over');
+   if (!draggedCategoryId || draggedCategoryId === targetCategoryId) return;
+
+   const cats = sortedCategories();
+   const fromIdx = cats.findIndex(c => c.id === draggedCategoryId);
+   const toIdx = cats.findIndex(c => c.id === targetCategoryId);
+   if (fromIdx === -1 || toIdx === -1) return;
+
+   const [moved] = cats.splice(fromIdx, 1);
+   cats.splice(toIdx, 0, moved);
+   cats.forEach((c, i) => { c.order = i; });
+
+   saveState();
+   renderSidebar();
+  }
+
+  function onDragEnd() {
+   document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+   document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+   document.querySelectorAll('.drag-over-top').forEach(el => el.classList.remove('drag-over-top'));
+   document.querySelectorAll('.drag-over-bottom').forEach(el => el.classList.remove('drag-over-bottom'));
+   draggedBoardId = null;
+   draggedCategoryId = null;
+  }
  function archiveBoard(boardId) {
    const board = state.boards.find(b => b.id === boardId);
 
@@ -1443,42 +1613,105 @@
    const navAlt = document.getElementById('nav-alters-label');
    if (navAlt) navAlt.textContent = cap(t('alters'));
 
-  if (!state.boards.length) {
-   container.innerHTML =
-   `<div style="padding:6px 16px 10px;font-size:0.78rem;color:var(--text-2);font-style:italic;">
-   No ${t('boards')} yet
-   </div>`;
-   return;
+   const activeBoards = state.boards.filter(b => !b.archived);
+
+   if (!activeBoards.length && !state.categories.length) {
+    container.innerHTML =
+     `<div style="padding:6px 16px 10px;font-size:0.78rem;color:var(--text-2);font-style:italic;">
+     No ${t('boards')} yet
+     </div>`;
+    return;
+   }
+
+   const renderBoardItem = (b, categoryId) => `
+    <div
+     class="sidebar-item ${currentView === 'board' && state.currentBoardId === b.id ? 'active' : ''}"
+     id="board-btn-${esc(b.id)}"
+     role="button"
+     tabindex="0"
+     draggable="true"
+     ondragstart="onBoardDragStart(event,'${esc(b.id)}')"
+     ondragover="onBoardDragOver(event)"
+     ondragleave="onBoardDragLeave(event)"
+     ondrop="onBoardDrop(event,${categoryId ? `'${esc(categoryId)}'` : 'null'},'${esc(b.id)}')"
+     ondragend="onDragEnd()"
+     onclick="navigate('board','${esc(b.id)}')"
+     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();navigate('board','${esc(b.id)}')}"
+    >
+     <div class="sidebar-dot" style="background:${esc(b.color || '#7c6fcd')}"></div>
+     <span class="sidebar-item-name">
+      <span>${esc(b.name)}</span>
+     </span>
+     <span class="board-move-buttons">
+      <button class="btn btn-ghost btn-icon" title="Move up" onclick="event.stopPropagation();moveBoardUp('${esc(b.id)}')">↑</button>
+      <button class="btn btn-ghost btn-icon" title="Move down" onclick="event.stopPropagation();moveBoardDown('${esc(b.id)}')">↓</button>
+     </span>
+    </div>
+   `;
+
+   const uncategorized = boardsForCategory(null);
+
+   let html = '';
+
+   if (uncategorized.length) {
+    html += `
+     <div class="category-block"
+      ondragover="onBoardDragOver(event)"
+      ondragleave="onBoardDragLeave(event)"
+      ondrop="onCategoryDropZone(event,null)"
+     >
+      ${uncategorized.map(b => renderBoardItem(b, null)).join('')}
+     </div>
+    `;
+   }
+
+   html += sortedCategories().map(cat => {
+    const boards = boardsForCategory(cat.id);
+    return `
+     <div class="category-block">
+      <div class="category-header"
+       draggable="true"
+       ondragstart="onCategoryDragStart(event,'${esc(cat.id)}')"
+       ondragover="onCategoryDragOver(event)"
+       ondragleave="onCategoryDragLeave(event)"
+       ondrop="onCategoryDrop(event,'${esc(cat.id)}')"
+       ondragend="onDragEnd()"
+      >
+       <button class="category-toggle" onclick="toggleCategoryCollapse('${esc(cat.id)}')">
+        <span class="category-caret ${cat.collapsed ? 'collapsed' : ''}">▾</span>
+        <span class="category-name">${esc(cat.name)}</span>
+        <span class="badge">${boards.length}</span>
+       </button>
+       <span class="category-actions">
+        <button class="btn btn-ghost btn-icon" title="Move category up" onclick="event.stopPropagation();moveCategoryUp('${esc(cat.id)}')">↑</button>
+        <button class="btn btn-ghost btn-icon" title="Move category down" onclick="event.stopPropagation();moveCategoryDown('${esc(cat.id)}')">↓</button>
+        <button class="sidebar-add" title="New board in ${esc(cat.name)}" onclick="event.stopPropagation();openNewBoardModal('${esc(cat.id)}')">
+         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="sidebar-add" title="Edit category" onclick="event.stopPropagation();openCategoryModal('${esc(cat.id)}')">✎</button>
+       </span>
+      </div>
+      <div class="category-boards ${cat.collapsed ? 'collapsed' : ''}"
+       ondragover="onBoardDragOver(event)"
+       ondragleave="onBoardDragLeave(event)"
+       ondrop="onCategoryDropZone(event,'${esc(cat.id)}')"
+      >
+       ${boards.length
+         ? boards.map(b => renderBoardItem(b, cat.id)).join('')
+         : `<div class="category-empty">Drag a ${t('board')} here</div>`}
+      </div>
+     </div>
+    `;
+   }).join('');
+
+   html += `
+    <button class="nav-item" onclick="openCategoryModal()">
+     <span class="sidebar-item-name">+ New Category</span>
+    </button>
+   `;
+
+   container.innerHTML = html;
   }
-
-  container.innerHTML = state.boards
-   .filter(b => !b.archived)
-   .map(b => `
-   <button
-   class="sidebar-item ${
-   currentView === 'board' && state.currentBoardId === b.id
-   ? 'active'
-   : ''
-   }"
-   id="board-btn-${esc(b.id)}"
-   onclick="navigate('board','${esc(b.id)}')"
-   >
-   <div
-   class="sidebar-dot"
-   style="background:${esc(b.color || '#7c6fcd')}"
-   ></div>
-
- <span class="sidebar-item-name">
- <span>${esc(b.name)}</span>
-
- <!-- <span class="board-move-buttons">
- <button class="btn btn-ghost btn-sm" onclick="moveBoardUp('${b.id}')">↑</button>
- <button class="btn btn-ghost btn-sm" onclick="moveBoardDown('${b.id}')">↓</button>
- </span> -->
- </span>
-   </button>
-   `)
-   .join('')};
    /* ============================================================
    RENDER: SYSTEM VIEW
   ============================================================ */
@@ -1664,12 +1897,17 @@
    if (!board) { container.innerHTML = '<p class="text-muted">Board not found.</p>'; return; }
 
    const fronter = getAlter(state.activeFronterId);
-   const posts = state.posts
-   .filter(p => p.boardId === board.id)
+   const boardPosts = state.posts.filter(p => p.boardId === board.id);
+   const topLevel = boardPosts
+   .filter(p => !p.parentId)
    .sort((a,b) => {
    if (a.pinned !== b.pinned) return b.pinned ? 1 : -1;
    return b.timestamp - a.timestamp;
    });
+   const repliesOf = (id) => boardPosts
+   .filter(p => p.parentId === id)
+   .sort((a,b) => a.timestamp - b.timestamp);
+   const posts = topLevel.flatMap(p => [p, ...repliesOf(p.id)]);
 
    const boardColor = board.color || '#7c6fcd';
 
@@ -1728,7 +1966,7 @@
    const pronouns = alter ? alter.pronouns : '';
    const compact = state.settings.compactPosts;
      return `
-   <div class="post ${p.pinned ? 'pinned' : ''}" style="${p.pinned ? `border-color:${color};` : ''}">
+   <div class="post ${p.pinned ? 'pinned' : ''} ${p.parentId ? 'is-reply' : ''}" style="${p.pinned ? `border-color:${color};` : ''}">
    <div class="post-header">
    <div class="post-avatar" style="background:${esc(color)}">${esc(emoji)}</div>
    <div class="post-meta">
@@ -1763,10 +2001,36 @@
    onclick="deletePost('${esc(p.id)}')">
    Delete
    </button>
+   <button class="btn btn-ghost btn-sm" 
+   onclick="openReplyComposer('${esc(p.id)}','${esc(name)}');">
+   Reply
+   </button>
   </div>
    </div>
    `;
   }
+  // Add this to your main script
+let currentReplyParentId = null;
+
+function openReplyComposer(parentId, parentAuthor) {
+    currentReplyParentId = parentId;
+
+    const composeBox = document.querySelector('.compose-box');
+    if (!composeBox) {
+        alert('Set who is fronting before replying.');
+        return;
+    }
+
+    // 1. Ensure the composer is visible/focused
+    const composerInput = document.getElementById('compose-input');
+    if (composerInput) {
+        composerInput.focus();
+        composerInput.placeholder = `Replying to ${parentAuthor}...`;
+    }
+
+    // Scroll to the composer
+    composeBox.scrollIntoView({ behavior: 'smooth' });
+}
 
   function showReactionPicker(postId) {
    const emojis = [
@@ -1851,7 +2115,8 @@
    content,
    timestamp: Date.now(),
    reactions: {},
-   pinned: false
+   pinned: false,
+   parentId: currentReplyParentId
    };
 
    state.posts.unshift(post);
@@ -1859,6 +2124,8 @@
    saveState();
 
    input.value = '';
+   input.placeholder = `Write a ${t('post')}...`;
+   currentReplyParentId = null;
 
    renderBoard();
    renderSidebar();
@@ -2226,12 +2493,20 @@
   /* ============================================================
    BOARD MODAL
   ============================================================ */
-  function openNewBoardModal() { openBoardModal(); }
+  function openNewBoardModal(presetCategoryId) { openBoardModal(null, presetCategoryId || null); }
 
-  function openBoardModal(id) {
+  function openBoardModal(id, presetCategoryId) {
    const board = id ? getBoard(id) : null;
    const isEdit = !!board;
-   const b = board || { id: uid(), name: '', description: '', owner: '', type: '', archived: "false", order: Date.now(), categoryId: "journaling123", color: PRESET_COLORS[Math.floor(Math.random()*PRESET_COLORS.length)] };
+   const b = board || {
+    id: uid(),
+    name: '',
+    description: '',
+    archived: false,
+    order: 0,
+    categoryId: presetCategoryId || null,
+    color: PRESET_COLORS[Math.floor(Math.random()*PRESET_COLORS.length)]
+   };
 
    showModal(`
    <div class="modal-header">
@@ -2248,6 +2523,13 @@
    <input class="form-input" id="b-desc" value="${esc(b.description)}" placeholder="What is this ${t('board')} for?" />
    </div>
 
+   <div class="form-group">
+   <label class="form-label">Category</label>
+   <select class="form-select" id="b-category">
+    <option value="" ${!b.categoryId ? 'selected' : ''}>No category</option>
+    ${sortedCategories().map(c => `<option value="${esc(c.id)}" ${b.categoryId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}
+   </select>
+   </div>
 
    <div class="form-group">
    <label class="form-label">Colour</label>
@@ -2280,25 +2562,36 @@
    return;
    }
 
+   const existing = isEdit ? getBoard(id) : null;
+   const categoryId = document.getElementById('b-category').value || null;
+
+   // Spread the existing board first so fields this form doesn't know about
+   // (categoryId, order, archived, etc.) survive an edit instead of being wiped.
    const board = {
+   ...(existing || {}),
    id,
    name,
    description: document.getElementById('b-desc').value.trim(),
    color: document.getElementById('b-color').value,
-   createdAt: isEdit
-   ? (getBoard(id)?.createdAt || Date.now())
-   : Date.now()
+   categoryId,
+   archived: existing ? !!existing.archived : false,
+   createdAt: existing ? (existing.createdAt || Date.now()) : Date.now()
    };
 
-   if (isEdit) {
+   if (existing) {
+   // Category changed — re-rank within the destination category so it
+   // doesn't keep a stale order value from its old category.
+   if ((existing.categoryId || null) !== categoryId) {
+    board.order = boardsForCategory(categoryId).length;
+   }
    const idx = state.boards.findIndex(b => b.id === id);
-
    if (idx >= 0) {
-   state.boards[idx] = board;
+    state.boards[idx] = board;
    } else {
-   state.boards.push(board);
+    state.boards.push(board);
    }
    } else {
+   board.order = boardsForCategory(categoryId).length;
    state.boards.push(board);
    }
 
@@ -2320,6 +2613,68 @@
    saveState();
    renderSidebar();
    navigate('alters');
+  }
+
+  /* ============================================================
+   CATEGORY MODAL
+  ============================================================ */
+  function openCategoryModal(id) {
+   const cat = id ? getCategory(id) : null;
+   const isEdit = !!cat;
+   const c = cat || { id: uid(), name: '' };
+
+   showModal(`
+   <div class="modal-header">
+   <h2>${isEdit ? 'Edit' : 'New'} Category</h2>
+   <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+   </div>
+   <div class="modal-body">
+   <div class="form-group">
+   <label class="form-label">Category Name *</label>
+   <input class="form-input" id="cat-name" value="${esc(c.name)}" placeholder="e.g. Daily Logs, Memories…" />
+   </div>
+   </div>
+   <div class="modal-footer">
+   ${isEdit ? `<button class="btn btn-danger" style="margin-right:auto" onclick="deleteCategory('${esc(c.id)}')">Delete</button>` : ''}
+   <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+   <button class="btn btn-primary" onclick="saveCategory('${esc(c.id)}',${isEdit})">Save</button>
+   </div>
+   `);
+  }
+
+  function saveCategory(id, isEdit) {
+   const name = document.getElementById('cat-name').value.trim();
+   if (!name) {
+   alert('Name is required.');
+   return;
+   }
+
+   if (isEdit) {
+   const cat = getCategory(id);
+   if (cat) cat.name = name;
+   } else {
+   state.categories.push({ id, name, order: state.categories.length, collapsed: false });
+   }
+
+   saveState();
+   closeModal();
+   renderSidebar();
+  }
+
+  function deleteCategory(id) {
+   const boardCount = state.boards.filter(b => b.categoryId === id && !b.archived).length;
+   const msg = boardCount
+   ? `Delete this category? Its ${boardCount} ${boardCount === 1 ? t('board') : t('boards')} will move to "No category" — they won't be deleted.`
+   : 'Delete this category?';
+   if (!confirm(msg)) return;
+
+   state.boards.forEach(b => { if (b.categoryId === id) b.categoryId = null; });
+   state.categories = state.categories.filter(c => c.id !== id);
+   reindexCategories();
+
+   saveState();
+   closeModal();
+   renderSidebar();
   }
 
 
@@ -2448,7 +2803,7 @@
    { id: alterId, name: 'River', pronouns: 'she/her', role: 'protector', color: '#5db8e8', emoji: '🌊', notes: '', createdAt: Date.now() }
    ];
    state.boards = [
-   { id: boardId, name: 'General', description: 'A space for everyday notes and messages.', color: '#7c6fcd', createdAt: Date.now(), categoryId: "journaling123"}
+   { id: boardId, name: 'General', description: 'A space for everyday notes and messages.', color: '#7c6fcd', createdAt: Date.now(), categoryId: "cat-general"}
    ];
    state.posts = [
    { id: uid(), boardId, alterId: hostId, content: 'Welcome to Paracosm! 👋\n\nThis is your system message board. Create alters, set who is fronting, and start posting.', timestamp: Date.now() - 3600000, pinned: true },
@@ -2487,8 +2842,17 @@
 
    state.boards.forEach(board => {
    if (board.archived === undefined) board.archived = false;
+   if (board.categoryId === undefined) board.categoryId = null;
    if (board.order === undefined) board.order = 0;
   });
+   if (!Array.isArray(state.categories)) state.categories = [];
+   state.categories.forEach((c, i) => {
+   if (c.order === undefined) c.order = i;
+   if (c.collapsed === undefined) c.collapsed = false;
+  });
+   reindexCategories();
+   reindexBoardList(boardsForCategory(null));
+   state.categories.forEach(c => reindexBoardList(boardsForCategory(c.id)));
 
    console.log('5 renderAll');
    renderAll();
