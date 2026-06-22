@@ -5,12 +5,17 @@ hey! my name is ezra, and i am the developer of Paracosm. Paracosm is a website 
 key included features:
 
 - track alters and system members
-- record front history (coming in v1.2)
 - keep thoughts organized with custom boards
 - leave messages for your alters
 - archive old boards without losing data
 - customize terminology to fit your system
 - easily export your data for backups or moving between devices
+
+upcoming features:
+
+- log front history (v1.2)
+- have multiple alters fronting at the same time (v1.2)
+- add custom fields on alters profiles (v1.3)
 
 frequently asked questions
 
