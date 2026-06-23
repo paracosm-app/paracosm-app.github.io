@@ -11,7 +11,7 @@
 </script>
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Paracosm v1.1.2</title>
+ <title>Paracosm v1.2</title>
  <style>
   /* ============================================================
    CSS CUSTOM PROPERTIES & RESET
@@ -127,6 +127,12 @@
    transition: border-color var(--transition), background-color var(--transition);
   }
   #fronter-select:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button#fronter-select { background-image: none; text-align: left; }
+  .fronter-extra { opacity: 0.75; font-weight: 700; }
+  .front-manage-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .fm-main-label { display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap; }
+  .fm-main-label input { cursor: pointer; accent-color: var(--accent); }
+  .front-entry-main-badge { font-weight: 700; }
 
   /* Header buttons */
   .hdr-btn {
@@ -421,7 +427,7 @@
   .post-pronouns { font-size: 0.75rem; color: var(--text-2); }
   .post-time { font-size: 0.75rem; color: var(--text-2); }
   .post-content { font-size: 0.92rem; line-height: var(--line-height); white-space: pre-wrap; word-break: break-word; }
-  .post-actions { display: flex; gap: 6px; margin-top: 10px; }
+  .post-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
   .post-pin-icon { color: var(--accent); font-size: 0.75rem; }
 
   .compose-box {
@@ -475,6 +481,71 @@
    position: absolute; top: 10px; right: 10px;
    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
    text-transform: uppercase;
+  }
+
+  /* ============================================================
+   FRONT HISTORY
+  ============================================================ */
+  .front-stats-bar {
+   display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+  }
+  .front-now-section {
+   display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px;
+  }
+  .front-day-group { margin-bottom: 22px; }
+  .front-day-header {
+   font-size: 0.76rem; font-weight: 700; text-transform: uppercase;
+   letter-spacing: 0.05em; color: var(--text-2); margin-bottom: 8px;
+   padding-left: 2px;
+  }
+  .front-entry-list { display: flex; flex-direction: column; gap: 8px; }
+  .front-entry-card {
+   display: flex; gap: 12px; align-items: flex-start;
+   background: var(--bg-1); border: 1px solid var(--border);
+   border-left: 3px solid var(--accent, #7c6fcd);
+   border-radius: var(--radius); padding: 12px 14px;
+   transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+  }
+  .front-entry-card.is-ongoing {
+   background: var(--accent-dim); box-shadow: 0 0 0 2px var(--accent-dim);
+  }
+  .front-avatar-stack { display: flex; flex-shrink: 0; padding-left: 10px; }
+  .front-avatar-mini {
+   width: 32px; height: 32px; border-radius: 50%;
+   display: flex; align-items: center; justify-content: center;
+   font-size: 0.85rem; color: #fff; border: 2px solid var(--bg-1);
+   margin-left: -10px; flex-shrink: 0;
+  }
+  .front-entry-body { flex: 1; min-width: 0; }
+  .front-entry-names {
+   font-weight: 700; font-size: 0.92rem;
+   display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .front-ongoing-badge { animation: front-pulse 2s ease-in-out infinite; }
+  @keyframes front-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .front-entry-time {
+   margin-top: 3px; display: flex; align-items: center; gap: 8px;
+   flex-wrap: wrap;
+  }
+  .front-entry-notes { color: var(--text-1); white-space: pre-wrap; }
+  .front-entry-actions {
+   display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap;
+   justify-content: flex-end;
+  }
+  .alter-check-list {
+   display: flex; flex-direction: column; gap: 2px; max-height: 220px;
+   overflow-y: auto; border: 1.5px solid var(--border);
+   border-radius: var(--radius-sm); padding: 6px;
+  }
+  .alter-check-item {
+   display: flex; align-items: center; gap: 8px; padding: 7px 8px;
+   border-radius: var(--radius-sm); cursor: pointer; font-size: 0.88rem;
+   transition: background var(--transition);
+  }
+  .alter-check-item:hover { background: var(--bg-2); }
+  .alter-check-item input { cursor: pointer; accent-color: var(--accent); }
+  .alter-check-dot {
+   width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
   }
 
   /* ============================================================
@@ -553,6 +624,8 @@
   @media (max-width: 640px) {
    :root { --sidebar-w: 0px; }
    #sidebar-toggle { display: flex; }
+   .front-entry-card { flex-wrap: wrap; }
+   .front-entry-actions { width: 100%; justify-content: flex-start; margin-top: 4px; }
    #sidebar {
    transform: translateX(-100%);
    width: 260px;
@@ -777,16 +850,12 @@
 
  <a class="logo" href="#" onclick="navigate('alters'); return false;">
  <div class="logo-dot" id="logo-dot"></div>
- Paracosm (v1.1.8)
+ Paracosm (v1.2)
  </a>
 
  <div id="header-spacer"></div>
 
  <div id="fronter-wrap">
- <span class="fronter-label" id="fronting-label"> fronting as </span>
- <select id="fronter-select" onchange="setFronter(this.value)">
- <option value="">— no one —</option>
- </select>
  </div>
 
  <button class="hdr-btn" onclick="navigate('settings')" title="Settings">
@@ -864,6 +933,29 @@
  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
  </svg>
  <span class="sidebar-item-name" id="nav-sys-label"> System </span>
+ </button>
+   <button
+ class="nav-item"
+ id="nav-front"
+ onclick="navigate('front')"
+ ><svg
+  class="nav-icon"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <polyline points="12 12 16 12" />
+  <polyline points="12 12 12 6" />
+</svg>
+
+ 
+ <span class="sidebar-item-name" id="nav-front-label"> Front History </span>
  </button>
  </div>
 
@@ -1004,6 +1096,7 @@
  <div id="view-board" class="hidden"></div>
  <div id="view-settings" class="hidden"></div>
  <div id="view-system" class="hidden"></div>
+   <div id="view-front" class="hidden"></div>
  <div id="view-archive" class="hidden"></div>
  </main>
  </div>
@@ -1172,12 +1265,15 @@
    highContrast: false,
    showPronouns: true,
    showRole: true,
-   compactPosts: false
+   compactPosts: false,
+   mainChangeSplitsHistory: false
    },
    alters: [],
    boards: [],
    posts: [],
+   frontHistory: [],
    activeFronterId: null,
+   activeFronterIds: [],
    currentBoardId: null,
 
   };
@@ -1209,7 +1305,21 @@
   state.posts.forEach(post => {
    if (!post.reactions)
    post.reactions = {};
-  });  } catch(e) {}
+  });
+  if (!Array.isArray(state.frontHistory)) state.frontHistory = [];
+  state.frontHistory.forEach(entry => {
+   if (!Array.isArray(entry.alterIds)) entry.alterIds = entry.alterId ? [entry.alterId] : [];
+   if (typeof entry.notes !== 'string') entry.notes = '';
+   if (entry.endTime === undefined) entry.endTime = null;
+   if (!entry.mainId || !entry.alterIds.includes(entry.mainId)) entry.mainId = entry.alterIds[0] || null;
+  });
+  // Old saves only ever tracked a single fronter (activeFronterId). Derive
+  // the new multi-fronter set from it the first time we see such a save.
+  if (!Array.isArray(state.activeFronterIds)) {
+   state.activeFronterIds = state.activeFronterId ? [state.activeFronterId] : [];
+  }
+  if (state.settings.mainChangeSplitsHistory === undefined) state.settings.mainChangeSplitsHistory = false;
+  } catch(e) {}
   }
 
   /* ============================================================
@@ -1366,6 +1476,7 @@
    document.getElementById('view-settings').classList.add('hidden');
    document.getElementById('view-system').classList.add('hidden');
    document.getElementById('view-archive').classList.add('hidden');
+    document.getElementById('view-front').classList.add('hidden');
 
    // Clear nav active states
    document.querySelectorAll('.nav-item, .sidebar-item').forEach(el => el.classList.remove('active'));
@@ -1399,6 +1510,11 @@
    document.getElementById('nav-archive').classList.add('active');
    renderArchive();
   }
+     else if (view === 'front') {
+   document.getElementById('view-front').classList.remove('hidden');
+   document.getElementById('nav-front').classList.add('active');
+   renderFront();
+  }
    closeSidebar();
   }
 
@@ -1413,30 +1529,172 @@
 
   /* ============================================================
    FRONTER
+   Any number of alters can be fronting at once (state.activeFronterIds).
+   One of them is the "main" fronter (state.activeFronterId) — that's
+   who new posts are signed with and whose colour drives the theme.
+   Whether changing the main (without changing the fronting set) starts
+   a new front-history entry is controlled by
+   settings.mainChangeSplitsHistory.
   ============================================================ */
-  function setFronter(id) {
-   state.activeFronterId = id || null;
+  function getFrontingIds() {
+   return Array.isArray(state.activeFronterIds) ? state.activeFronterIds : (state.activeFronterId ? [state.activeFronterId] : []);
+  }
+
+  function setsEqual(a, b) {
+   if (a.length !== b.length) return false;
+   const sa = [...a].sort(), sb = [...b].sort();
+   return sa.every((v, i) => v === sb[i]);
+  }
+
+  // Central place that changes who's fronting + who's main. Decides
+  // whether to close the open front-history entry and start a new one,
+  // or just relabel the current one, based on what actually changed.
+  function updateFronting(newIds, newMainId) {
+   newIds = [...new Set(newIds.filter(Boolean))];
+   if (!newIds.length) {
+   newMainId = null;
+   } else if (!newMainId || !newIds.includes(newMainId)) {
+   newMainId = newIds.includes(state.activeFronterId) ? state.activeFronterId : newIds[0];
+   }
+
+   const oldIds = getFrontingIds();
+   const oldMainId = state.activeFronterId || null;
+   const sameSet = setsEqual(oldIds, newIds);
+   const sameMain = oldMainId === newMainId;
+
+   if (sameSet && sameMain) return;
+
+   if (!Array.isArray(state.frontHistory)) state.frontHistory = [];
+   const now = Date.now();
+   const open = state.frontHistory.find(e => e.endTime == null);
+
+   if (sameSet && !sameMain && !state.settings.mainChangeSplitsHistory) {
+   // Same group fronting, just relabel who notes post under — keep the
+   // ongoing entry instead of splitting it.
+   if (open) open.mainId = newMainId;
+   } else {
+   if (open) open.endTime = now;
+   if (newIds.length) {
+    state.frontHistory.push({
+    id: uid(),
+    alterIds: newIds,
+    mainId: newMainId,
+    startTime: now,
+    endTime: null,
+    notes: '',
+    createdAt: now
+    });
+   }
+   }
+
+   state.activeFronterIds = newIds;
+   state.activeFronterId = newMainId;
 
    saveState();
    applyTheme();
    renderAll();
-
-
   }
 
+  // Add/remove a single alter from the fronting set, keeping main sane.
+  function toggleFrontMember(id) {
+   const ids = getFrontingIds();
+   let newMainId = state.activeFronterId;
+   let newIds;
+   if (ids.includes(id)) {
+   newIds = ids.filter(x => x !== id);
+   if (newMainId === id) newMainId = newIds[0] || null;
+   } else {
+   newIds = [...ids, id];
+   if (!newMainId) newMainId = id;
+   }
+   updateFronting(newIds, newMainId);
+  }
 
+  // Make an already-fronting (or newly-added) alter the main fronter.
+  function setMainFronter(id) {
+   const ids = getFrontingIds();
+   const newIds = ids.includes(id) ? ids : [...ids, id];
+   updateFronting(newIds, id);
+  }
+
+  function stepDownAll() {
+   updateFronting([], null);
+  }
 
   function renderFronterSelect() {
-   const sel = document.getElementById('fronter-select');
-   if (!sel) return;
-   const cur = state.activeFronterId;
-   sel.innerHTML = `<option value="">— none —</option>` +
-   state.alters.map(a =>
-   `<option value="${esc(a.id)}" ${a.id===cur?'selected':''}>${esc(a.name)}</option>`
-   ).join('');
-   // Update label
-   const label = document.getElementById('fronting-label');
-   if (label) label.textContent = t('fronting') + ' as';
+   const wrap = document.getElementById('fronter-wrap');
+   if (!wrap) return;
+   const ids = getFrontingIds();
+   const mainAlter = getAlter(state.activeFronterId);
+   const others = Math.max(0, ids.length - (mainAlter ? 1 : 0));
+   const label = !ids.length
+   ? `<span class="text-muted">— no one —</span>`
+   : `${esc(mainAlter ? mainAlter.name : '?')}` + (others > 0 ? ` <span class="fronter-extra">+${others}</span>` : '');
+
+   wrap.innerHTML = `
+   <span class="fronter-label" id="fronting-label">${cap(t('fronting'))} as</span>
+   <button id="fronter-select" type="button" onclick="openFrontManageModal()">${label}</button>
+   `;
+  }
+
+  /* ---- modal: choose who's fronting + who's main ---- */
+  function openFrontManageModal() {
+   const ids = getFrontingIds();
+   const mainId = state.activeFronterId;
+
+   showModal(`
+   <div class="modal-header">
+   <h2>Who's ${t('fronting')}?</h2>
+   <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+   </div>
+   <div class="modal-body">
+   <div class="form-hint mb-2">Check everyone currently ${t('fronting')}. Pick one as <strong>Main</strong> — that's who new ${t('posts')} are signed with.</div>
+   <div class="alter-check-list">
+   ${state.alters.length ? state.alters.map(a => `
+    <div class="alter-check-item front-manage-row">
+    <label>
+     <input type="checkbox" class="fm-front-cb" value="${esc(a.id)}" ${ids.includes(a.id) ? 'checked' : ''} onchange="onFrontManageCheckChange()" />
+     <span class="alter-check-dot" style="background:${esc(a.color)}"></span>
+     ${esc(a.name)}
+    </label>
+    <label class="fm-main-label text-sm text-muted">
+     <input type="radio" name="fm-main" class="fm-main-radio" value="${esc(a.id)}" ${a.id===mainId ? 'checked':''} ${ids.includes(a.id) ? '' : 'disabled'} />
+     Main
+    </label>
+    </div>
+   `).join('') : `<div class="text-sm text-muted" style="padding:6px;">No ${t('alters')} yet — add one first.</div>`}
+   </div>
+   </div>
+   <div class="modal-footer">
+   <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+   <button class="btn btn-primary" onclick="applyFrontManage()">Save</button>
+   </div>
+   `);
+  }
+
+  function onFrontManageCheckChange() {
+   document.querySelectorAll('.fm-main-radio').forEach(r => {
+   const cb = document.querySelector(`.fm-front-cb[value="${CSS.escape(r.value)}"]`);
+   const stillIn = !!(cb && cb.checked);
+   r.disabled = !stillIn;
+   if (!stillIn && r.checked) r.checked = false;
+   });
+   const anyMain = Array.from(document.querySelectorAll('.fm-main-radio')).some(r => r.checked);
+   if (!anyMain) {
+   const firstChecked = document.querySelector('.fm-front-cb:checked');
+   if (firstChecked) {
+    const r = document.querySelector(`.fm-main-radio[value="${CSS.escape(firstChecked.value)}"]`);
+    if (r) r.checked = true;
+   }
+   }
+  }
+
+  function applyFrontManage() {
+   const newIds = Array.from(document.querySelectorAll('.fm-front-cb:checked')).map(cb => cb.value);
+   const mainRadio = document.querySelector('.fm-main-radio:checked');
+   const newMainId = mainRadio ? mainRadio.value : (newIds[0] || null);
+   closeModal();
+   updateFronting(newIds, newMainId);
   }
 
   /* ============================================================
@@ -1828,6 +2086,321 @@
   </div>  </div>
    `;
   }
+
+  /* ============================================================
+   RENDER: FRONT HISTORY VIEW
+   Each entry = { id, alterIds:[...], startTime, endTime|null, notes }.
+   alterIds is an array so co-fronting (multiple alters at once) is
+   already supported by the data model and the editor below, even
+   though the single fronter-select at the top only tracks one at a
+   time today.
+  ============================================================ */
+  let frontFilterAlterId = '';
+
+  function renderFront() {
+   const container = document.getElementById('view-front');
+   if (!Array.isArray(state.frontHistory)) state.frontHistory = [];
+
+   const filterId = frontFilterAlterId;
+   const filtered = state.frontHistory.filter(e => !filterId || (e.alterIds||[]).includes(filterId));
+   const sorted = [...filtered].sort((a,b) => b.startTime - a.startTime);
+
+   const openEntries = sorted.filter(e => e.endTime == null);
+   const closedEntries = sorted.filter(e => e.endTime != null);
+   const groups = groupFrontEntriesByDay(closedEntries);
+
+   const totalEntries = state.frontHistory.length;
+   const distinctAlters = new Set(state.frontHistory.flatMap(e => e.alterIds||[])).size;
+
+   container.innerHTML = `
+   <div class="page-header">
+   <div class="page-title-dot"></div>
+   <h1>Front History</h1>
+   <button class="btn btn-primary btn-sm" onclick="openFrontEntryModal()">+ Log Entry</button>
+   </div>
+
+   <div class="card card-sm mb-2 front-stats-bar">
+   <div><strong>${totalEntries}</strong> <span class="text-muted text-sm">${totalEntries===1?'entry':'entries'} logged</span></div>
+   <div><strong>${distinctAlters}</strong> <span class="text-muted text-sm">${t(distinctAlters===1?'alter':'alters')} tracked</span></div>
+   <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+   <label class="text-sm text-muted" for="front-filter-select">Filter</label>
+   <select class="form-select" id="front-filter-select" style="width:auto;min-width:150px" onchange="updateFrontFilter(this.value)">
+    <option value="">All ${t('alters')}</option>
+    ${state.alters.map(a => `<option value="${esc(a.id)}" ${filterId===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}
+   </select>
+   </div>
+   </div>
+
+   ${openEntries.length ? `
+   <div class="front-now-section">
+   ${openEntries.map(e => renderFrontEntryCard(e, true)).join('')}
+   </div>
+   ` : `
+   <div class="card card-sm mb-2" style="text-align:center;color:var(--text-2);font-size:0.85rem;">
+   Nobody is currently logged as ${t('fronting')}.
+   </div>
+   `}
+
+   ${!closedEntries.length ? `
+   ${!openEntries.length ? `
+   <div class="empty-state">
+    <div class="empty-icon">🕓</div>
+    <div class="empty-title">No front history yet</div>
+    <div class="empty-desc">Switches are logged automatically when you change who's ${t('fronting')}, or you can add one retroactively.</div>
+    <button class="btn btn-primary btn-sm" onclick="openFrontEntryModal()">Log the first entry</button>
+   </div>
+   ` : ''}
+   ` : groups.map(g => `
+   <div class="front-day-group">
+   <div class="front-day-header">${esc(g.label)}</div>
+   <div class="front-entry-list">
+    ${g.entries.map(e => renderFrontEntryCard(e, false)).join('')}
+   </div>
+   </div>
+   `).join('')}
+   `;
+  }
+
+  function updateFrontFilter(value) {
+   frontFilterAlterId = value || '';
+   renderFront();
+  }
+
+  function renderFrontEntryCard(e, isOpen) {
+   const alters = (e.alterIds||[]).map(id => getAlter(id)).filter(Boolean);
+   const missingCount = (e.alterIds||[]).length - alters.length;
+   const mainId = e.mainId || (e.alterIds||[])[0];
+   const accent = (getAlter(mainId) || alters[0]) ? (getAlter(mainId) || alters[0]).color : '#9090a0';
+   const names = alters.length
+   ? alters.map(a => a.id === mainId && alters.length > 1 ? `<span class="front-entry-main-badge">★ ${esc(a.name)}</span>` : esc(a.name)).join(' & ')
+   : 'Unknown';
+   const endPoint = isOpen ? Date.now() : (e.endTime || Date.now());
+   const duration = formatFrontDuration(endPoint - e.startTime);
+
+   return `
+   <div class="front-entry-card ${isOpen?'is-ongoing':''}" style="--accent:${esc(accent)};--accent-dim:${esc(accent)}28;">
+   <div class="front-avatar-stack">
+   ${alters.map(a => `<div class="front-avatar-mini" style="background:${esc(a.color)}" title="${esc(a.name)}">${esc(a.emoji||a.name[0]||'?')}</div>`).join('')}
+   ${missingCount > 0 ? `<div class="front-avatar-mini" style="background:#9090a0">?</div>` : ''}
+   </div>
+   <div class="front-entry-body">
+   <div class="front-entry-names">
+    <span>${names}</span>
+    ${missingCount > 0 ? `<span class="text-muted text-sm">(+${missingCount} removed)</span>` : ''}
+    ${isOpen ? `<span class="tag front-ongoing-badge">● Ongoing</span>` : ''}
+   </div>
+   <div class="front-entry-time text-sm text-muted">
+    <span>${isOpen ? formatFrontFull(e.startTime) : formatFrontClock(e.startTime)} – ${isOpen ? 'now' : formatFrontClock(e.endTime)}</span>
+    <span class="badge">${duration}</span>
+   </div>
+   ${e.notes ? `<div class="front-entry-notes text-sm mt-1">${esc(e.notes)}</div>` : ''}
+   </div>
+   <div class="front-entry-actions">
+   ${isOpen ? `<button class="btn btn-ghost btn-sm" onclick="endFrontEntryNow('${esc(e.id)}')">End now</button>` : ''}
+   <button class="btn btn-secondary btn-sm" onclick="openFrontEntryModal('${esc(e.id)}')">Edit</button>
+   <button class="btn btn-ghost btn-sm" style="color:#ef4444" onclick="deleteFrontEntry('${esc(e.id)}')">Delete</button>
+   </div>
+   </div>
+   `;
+  }
+
+  /* ---- modal: add / edit a front-history entry ---- */
+  function openFrontEntryModal(id) {
+   const existing = id ? state.frontHistory.find(e => e.id === id) : null;
+   const isEdit = !!existing;
+   const e = existing || {
+   id: uid(),
+   alterIds: state.activeFronterId ? [state.activeFronterId] : [],
+   startTime: Date.now(),
+   endTime: null,
+   notes: ''
+   };
+   const ongoing = e.endTime == null;
+
+   showModal(`
+   <div class="modal-header">
+   <h2>${isEdit ? 'Edit' : 'Log'} Front Entry</h2>
+   <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+   </div>
+   <div class="modal-body">
+   <div class="form-group">
+   <label class="form-label">Who was ${t('fronting')}? *</label>
+   <div class="alter-check-list">
+    ${state.alters.length ? state.alters.map(a => `
+    <label class="alter-check-item">
+     <input type="checkbox" value="${esc(a.id)}" ${e.alterIds.includes(a.id) ? 'checked' : ''} />
+     <span class="alter-check-dot" style="background:${esc(a.color)}"></span>
+     ${esc(a.name)}
+    </label>
+    `).join('') : `<div class="text-sm text-muted" style="padding:6px;">No ${t('alters')} yet — add one first.</div>`}
+   </div>
+   <div class="form-hint">Select more than one for co-fronting / simultaneous fronts.</div>
+   </div>
+
+   <div class="form-group">
+   <label class="form-label">Main (who ${t('posts')} would be signed as)</label>
+   <select class="form-select" id="fe-main">
+   ${state.alters.map(a => `<option value="${esc(a.id)}" ${ (e.mainId || e.alterIds[0]) === a.id ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}
+   </select>
+   </div>
+
+   <div class="form-row">
+   <div class="form-group">
+    <label class="form-label">Start *</label>
+    <input type="datetime-local" class="form-input" id="fe-start" value="${frontTsToInput(e.startTime)}" />
+   </div>
+   <div class="form-group">
+    <label class="form-label">End</label>
+    <input type="datetime-local" class="form-input" id="fe-end" value="${e.endTime ? frontTsToInput(e.endTime) : ''}" ${ongoing ? 'disabled' : ''} />
+   </div>
+   </div>
+
+   <label class="form-check mb-2">
+   <input type="checkbox" id="fe-ongoing" ${ongoing ? 'checked' : ''} onchange="document.getElementById('fe-end').disabled=this.checked; if(this.checked) document.getElementById('fe-end').value='';" />
+   Still ${t('fronting')} (no end time yet)
+   </label>
+
+   <div class="form-group">
+   <label class="form-label">Notes</label>
+   <textarea class="form-textarea" id="fe-notes" placeholder="Optional context, mood, triggers…">${esc(e.notes||'')}</textarea>
+   </div>
+   </div>
+   <div class="modal-footer">
+   ${isEdit ? `<button class="btn btn-danger btn-sm" onclick="deleteFrontEntry('${esc(e.id)}')">Delete</button>` : ''}
+   <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+   <button class="btn btn-primary" onclick="saveFrontEntry('${esc(e.id)}',${isEdit})">Save</button>
+   </div>
+   `);
+  }
+
+  function saveFrontEntry(id, isEdit) {
+   const checked = Array.from(document.querySelectorAll('.alter-check-item input[type="checkbox"]:checked')).map(cb => cb.value);
+   if (!checked.length) { alert(`Select at least one ${t('alter')}.`); return; }
+
+   const startVal = document.getElementById('fe-start').value;
+   if (!startVal) { alert('Start time is required.'); return; }
+   const startTime = frontInputToTs(startVal);
+
+   const ongoing = document.getElementById('fe-ongoing').checked;
+   let endTime = null;
+   if (!ongoing) {
+   const endVal = document.getElementById('fe-end').value;
+   if (endVal) {
+    endTime = frontInputToTs(endVal);
+    if (endTime <= startTime) { alert('End time must be after the start time.'); return; }
+   }
+   }
+
+   const notes = document.getElementById('fe-notes').value.trim();
+   const prior = isEdit ? state.frontHistory.find(e => e.id === id) : null;
+
+   const mainSel = document.getElementById('fe-main') ? document.getElementById('fe-main').value : null;
+   const mainId = checked.includes(mainSel) ? mainSel : checked[0];
+
+   const entry = {
+   id,
+   alterIds: checked,
+   mainId,
+   startTime,
+   endTime,
+   notes,
+   createdAt: prior ? (prior.createdAt || Date.now()) : Date.now()
+   };
+
+   if (isEdit) {
+   const idx = state.frontHistory.findIndex(e => e.id === id);
+   if (idx >= 0) state.frontHistory[idx] = entry; else state.frontHistory.push(entry);
+   } else {
+   // Adding a brand-new ongoing entry should replace whatever was
+   // previously marked as the open one, rather than running alongside it.
+   if (entry.endTime == null) {
+   state.frontHistory.forEach(x => { if (x.endTime == null) x.endTime = entry.startTime; });
+   }
+   state.frontHistory.push(entry);
+   }
+
+   // If we just edited the entry that's currently open, keep the header's
+   // notion of who's fronting in sync with it.
+   if (entry.endTime == null) {
+   state.activeFronterIds = entry.alterIds;
+   state.activeFronterId = entry.mainId;
+   applyTheme();
+   }
+
+   saveState();
+   closeModal();
+   renderFront();
+  }
+
+  function endFrontEntryNow(id) {
+   const e = state.frontHistory.find(x => x.id === id);
+   if (!e) return;
+   e.endTime = Date.now();
+   saveState();
+   renderFront();
+  }
+
+  function deleteFrontEntry(id) {
+   if (!confirm('Delete this front history entry? This cannot be undone.')) return;
+   state.frontHistory = state.frontHistory.filter(e => e.id !== id);
+   saveState();
+   closeModal();
+   renderFront();
+  }
+
+  /* ---- small formatting helpers, scoped to front history ---- */
+  function frontTsToInput(ts) {
+   const d = new Date(ts);
+   const p = n => String(n).padStart(2,'0');
+   return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+  function frontInputToTs(val) {
+   return new Date(val).getTime();
+  }
+  function formatFrontClock(ts) {
+   return new Date(ts).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+  function formatFrontFull(ts) {
+   return new Date(ts).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+  function formatFrontDuration(ms) {
+   if (ms < 0) ms = 0;
+   const mins = Math.floor(ms / 60000);
+   const h = Math.floor(mins / 60);
+   const m = mins % 60;
+   if (h <= 0) return `${m}m`;
+   if (h < 24) return `${h}h ${m}m`;
+   const d = Math.floor(h / 24), rh = h % 24;
+   return `${d}d ${rh}h`;
+  }
+  function frontDayKey(ts) {
+   const d = new Date(ts);
+   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  }
+  function frontDayLabel(ts) {
+   const d = new Date(ts);
+   const now = new Date();
+   const startOfDay = dt => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+   const diffDays = Math.round((startOfDay(now) - startOfDay(d)) / 86400000);
+   if (diffDays === 0) return 'Today';
+   if (diffDays === 1) return 'Yesterday';
+   return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+  }
+  function groupFrontEntriesByDay(entries) {
+   const groups = [];
+   let key = null, group = null;
+   entries.forEach(e => {
+   const k = frontDayKey(e.startTime);
+   if (k !== key) {
+    group = { label: frontDayLabel(e.startTime), entries: [] };
+    groups.push(group);
+    key = k;
+   }
+   group.entries.push(e);
+   });
+   return groups;
+  }
+
   /* ============================================================
    RENDER: ALTERS VIEW
   ============================================================ */
@@ -1868,12 +2441,14 @@
    renderAlters();
   }
   function renderAlterCard(a) {
-   const isFronting = a.id === state.activeFronterId;
+   const frontIds = getFrontingIds();
+   const isFronting = frontIds.includes(a.id);
+   const isMain = a.id === state.activeFronterId;
    const postCount = state.posts.filter(p => p.alterId === a.id).length;
    return `
    <div class="alter-card ${isFronting ? 'fronting' : ''}" style="--accent:${esc(a.color)};--accent-dim:${esc(a.color)}28;--accent-text:${accentText(a.color)};">
    <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${esc(a.color)};border-radius:var(--radius) var(--radius) 0 0;"></div>
-   ${isFronting ? `<div class="tag alter-fronting-badge">${cap(t('fronting'))}</div>` : ''}
+   ${isFronting ? `<div class="tag alter-fronting-badge">${cap(t('fronting'))}${isMain ? ' · Main' : ''}</div>` : ''}
    <div class="alter-avatar" style="background:${esc(a.color)}">${esc(a.emoji||a.name[0]||'?')}</div>
    <div class="alter-name">${esc(a.name)}</div>
    ${state.settings.showPronouns && a.pronouns ? `<div class="alter-pronouns">${esc(a.pronouns)}</div>` : ''}
@@ -1881,7 +2456,10 @@
    ${a.notes ? `<div class="text-sm text-muted mt-1" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(a.notes)}</div>` : ''}
    <div class="post-actions mt-2">
    <button class="btn btn-secondary btn-sm" onclick="openAlterModal('${esc(a.id)}')">Edit</button>
-   ${!isFronting ? `<button class="btn btn-sm" style="background:${esc(a.color)}1a;color:${esc(a.color)};border:1px solid ${esc(a.color)}40;" onclick="setFronter('${esc(a.id)}')">Set ${cap(t('fronting'))}</button>` : `<button class="btn btn-sm btn-ghost" onclick="setFronter('')">Step down</button>`}
+   ${isFronting
+    ? `<button class="btn btn-sm btn-ghost" onclick="toggleFrontMember('${esc(a.id)}')">Step down</button>` +
+     (isMain ? '' : `<button class="btn btn-sm" style="background:${esc(a.color)}1a;color:${esc(a.color)};border:1px solid ${esc(a.color)}40;" onclick="setMainFronter('${esc(a.id)}')">Make main</button>`)
+    : `<button class="btn btn-sm" style="background:${esc(a.color)}1a;color:${esc(a.color)};border:1px solid ${esc(a.color)}40;" onclick="toggleFrontMember('${esc(a.id)}')">Set ${cap(t('fronting'))}</button>`}
    <span class="badge">${postCount} ${t('posts')}</span>
    </div>
    </div>
@@ -1932,6 +2510,7 @@
    <div class="compose-header">
    <div class="post-avatar" style="background:${esc(fronter.color)};width:28px;height:28px;font-size:0.85rem;">${esc(fronter.emoji||fronter.name[0])}</div>
    <span class="compose-as">Posting as <strong style="color:${esc(fronter.color)}">${esc(fronter.name)}</strong></span>
+   ${getFrontingIds().length > 1 ? `<span class="text-sm text-muted">· also ${t('fronting')}: ${getFrontingIds().filter(id=>id!==fronter.id).map(id=>esc((getAlter(id)||{}).name||'?')).join(', ')}</span>` : ''}
    </div>
    <textarea id="compose-input" placeholder="Write a ${t('post')}..." rows="3"></textarea>
    <div class="compose-footer">
@@ -2211,6 +2790,10 @@ function openReplyComposer(parentId, parentAuthor) {
    <div><div class="setting-label">Compact Posts</div><div class="setting-desc">Reduce post padding and hide extra info</div></div>
    <label class="toggle"><input type="checkbox" ${s.compactPosts?'checked':''} onchange="changeSetting('compactPosts',this.checked)"><span class="toggle-slider"></span></label>
    </div>
+   <div class="setting-row">
+   <div><div class="setting-label">Changing Main Affects History</div><div class="setting-desc">When ON, switching who ${t('posts')} are signed as (while the same group keeps ${t('fronting')}) starts a new front-history entry. When OFF, it just relabels the current one.</div></div>
+   <label class="toggle"><input type="checkbox" ${s.mainChangeSplitsHistory?'checked':''} onchange="changeSetting('mainChangeSplitsHistory',this.checked)"><span class="toggle-slider"></span></label>
+   </div>
    </div>
    </div>
 
@@ -2486,7 +3069,15 @@ function openReplyComposer(parentId, parentAuthor) {
   function deleteAlter(id) {
    if (!confirm(`Delete this ${t('alter')}? Their ${t('posts')} will remain.`)) return;
    state.alters = state.alters.filter(a => a.id !== id);
-   if (state.activeFronterId === id) state.activeFronterId = null;
+   state.activeFronterIds = getFrontingIds().filter(x => x !== id);
+   if (state.activeFronterId === id) state.activeFronterId = state.activeFronterIds[0] || null;
+   (state.frontHistory||[]).forEach(e => {
+   if (e.endTime == null && (e.alterIds||[]).includes(id)) {
+    e.alterIds = e.alterIds.filter(x => x !== id);
+    if (e.mainId === id) e.mainId = e.alterIds[0] || null;
+    if (!e.alterIds.length) e.endTime = Date.now();
+   }
+   });
    saveState(); closeModal(); renderAll();
   }
 
@@ -2775,6 +3366,7 @@ function openReplyComposer(parentId, parentAuthor) {
    else if (currentView === 'settings') renderSettings();
    else if (currentView === 'system') renderSystem();
    else if (currentView === 'archive') renderArchive();
+   else if (currentView === 'front') renderFront();
   }
 
   /* ============================================================
@@ -2810,6 +3402,10 @@ function openReplyComposer(parentId, parentAuthor) {
    { id: uid(), boardId, alterId: alterId, content: 'Hi! You can customise my colour, pronouns, and role by clicking Edit on my card.', timestamp: Date.now() - 1800000, pinned: false }
    ];
    state.activeFronterId = hostId;
+  state.activeFronterIds = [hostId];
+  state.frontHistory = [
+   { id: uid(), alterIds: [hostId], mainId: hostId, startTime: Date.now() - 3600000, endTime: null, notes: 'Logged automatically — entries like this are created whenever you change who\'s fronting up top.', createdAt: Date.now() }
+  ];
   state.systemFields = [
 
  {
@@ -2853,6 +3449,28 @@ function openReplyComposer(parentId, parentAuthor) {
    reindexCategories();
    reindexBoardList(boardsForCategory(null));
    state.categories.forEach(c => reindexBoardList(boardsForCategory(c.id)));
+
+
+   if (!Array.isArray(state.frontHistory)) state.frontHistory = [];
+   if (!Array.isArray(state.activeFronterIds)) {
+   state.activeFronterIds = state.activeFronterId ? [state.activeFronterId] : [];
+   }
+   if (!state._frontHistoryChecked) {
+   state._frontHistoryChecked = true;
+   if (state.activeFronterIds.length && !state.frontHistory.some(e => e.endTime == null)) {
+   const now = Date.now();
+   state.frontHistory.push({
+    id: uid(),
+    alterIds: [...state.activeFronterIds],
+    mainId: state.activeFronterId || state.activeFronterIds[0],
+    startTime: now,
+    endTime: null,
+    notes: '',
+    createdAt: now
+   });
+   }
+   saveState();
+   }
 
    console.log('5 renderAll');
    renderAll();
