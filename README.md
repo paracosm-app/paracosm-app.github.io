@@ -5,22 +5,20 @@ hey! my name is ezra, and i am the developer of Paracosm. Paracosm is a website 
 key included features:
 
 - track alters and system members
+- log fronts and co-fronts
 - keep thoughts organized with custom boards
 - leave messages for your alters
 - archive old boards without losing data
 - customize terminology to fit your system
 - easily export your data for backups or moving between devices
 
-upcoming features:
+upcoming features: 
 
-- log front history (v1.2)
-- have multiple alters fronting at the same time (v1.2)
 - add custom fields on alters profiles (v1.3)
+- push/pull to and from pluralkit (1.3)
+- import from simply plural, ourcana, and other plural apps (1.4)
 
 frequently asked questions
-
-Q: can i import from another site?
-A: currently the only imports supported are Paracosm JSONs themselves. i'm looking to add simply plural, ourcana, and pluralkit imports eventually, if possible, but this will be coming much later.
 
 Q: is this site open to systems of all origins?
 A: yes! i aim to be inclusive to *all* systems. i am very pro endo, and my site is as well.
