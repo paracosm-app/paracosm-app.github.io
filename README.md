@@ -11,12 +11,9 @@ key included features:
 - archive old boards without losing data
 - customize terminology to fit your system
 - easily export your data for backups or moving between devices
-
-upcoming features: 
-
-- add custom fields on alters profiles (v1.3)
-- push/pull to and from pluralkit (1.3)
-- import from simply plural, ourcana, and other plural apps (1.4)
+- import from simply plural, pluralkit, or pluralspace
+- sync to and from pluralkit with one button
+- lock boards behind a password, and only allow certain alters to see selected boards
 
 frequently asked questions
 
