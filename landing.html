@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- EDIT: browser tab title -->
+  <title>Paracosm</title>
+  <style>
+    :root {
+      --accent: #7c6fcd;
+      --bg-0: #f4f4f6;
+      --bg-1: #ffffff;
+      --bg-2: #eeeef2;
+      --text-0: #111118;
+      --text-1: #3a3a4a;
+      --text-2: #6b6b80;
+      --border: #d4d4de;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --transition: 0.15s ease;
+    }
+
+    [data-dark="true"] {
+      --bg-0: #0f0f14;
+      --bg-1: #17171f;
+      --bg-2: #1e1e28;
+      --text-0: #eeeef4;
+      --text-1: #c4c4d4;
+      --text-2: #7a7a94;
+      --border: #2e2e3e;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg-0);
+      color: var(--text-0);
+      line-height: 1.6;
+      font-size: 15px;
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    a { color: var(--accent); }
+    a:hover { text-decoration: underline; }
+
+    /* ── header ── */
+    header {
+      height: 52px;
+      display: flex; align-items: center;
+      padding: 0 24px; gap: 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-1);
+      position: sticky; top: 0; z-index: 10;
+      transition: background var(--transition), border-color var(--transition);
+    }
+
+    .logo {
+      font-weight: 700; font-size: 1rem;
+      color: var(--accent); letter-spacing: -0.01em;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .logo-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); display: inline-block;
+    }
+
+    .header-spacer { flex: 1; }
+
+    nav { display: flex; gap: 2px; }
+    .nav-link {
+      font-size: 0.85rem; color: var(--text-2);
+      padding: 5px 9px; border-radius: 6px;
+      text-decoration: none;
+      transition: background var(--transition), color var(--transition);
+    }
+    .nav-link:hover { background: var(--bg-2); color: var(--text-0); text-decoration: none; }
+
+    .dark-toggle {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-2); padding: 5px; border-radius: 6px;
+      display: flex; align-items: center;
+      transition: background var(--transition), color var(--transition);
+    }
+    .dark-toggle:hover { background: var(--bg-2); color: var(--text-0); }
+
+    /* ── page wrapper ── */
+    .page { max-width: 680px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── hero ── */
+    .hero {
+      padding: 64px 0 52px;
+    }
+
+    /* EDIT: hero headline */
+    .hero h1 {
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 700; letter-spacing: -0.02em;
+      line-height: 1.2; margin-bottom: 14px;
+    }
+
+    /* EDIT: hero description */
+    .hero p {
+      font-size: 1rem; color: var(--text-1);
+      max-width: 460px; margin-bottom: 28px;
+      line-height: 1.65;
+    }
+
+    /* ── buttons ── */
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 8px;
+      font-size: 0.875rem; font-weight: 500; font-family: inherit;
+      cursor: pointer; border: 1px solid transparent;
+      text-decoration: none; line-height: 1;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+    }
+
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      border-color: var(--accent);
+    }
+    .btn-primary:hover { background: #6a5ebd; border-color: #6a5ebd; color: #fff; text-decoration: none; }
+
+    .btn-secondary {
+      background: var(--bg-1); color: var(--text-1);
+      border-color: var(--border);
+    }
+    .btn-secondary:hover { background: var(--bg-2); color: var(--text-0); text-decoration: none; }
+
+    /* ── divider ── */
+    .divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* ── section ── */
+    .section-title {
+      font-size: 1.05rem; font-weight: 600;
+      margin-bottom: 4px; color: var(--text-0);
+    }
+    .section-sub {
+      font-size: 0.875rem; color: var(--text-2);
+      margin-bottom: 20px;
+    }
+
+    /* ── features ── */
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--border);
+    }
+
+    .feature-item {
+      background: var(--bg-1);
+      padding: 16px;
+      transition: background var(--transition);
+    }
+    .feature-item:hover { background: var(--bg-2); }
+
+    .feature-emoji { font-size: 1.1rem; margin-bottom: 6px; }
+
+    /* EDIT: feature title and description */
+    .feature-item h3 {
+      font-size: 0.875rem; font-weight: 600;
+      color: var(--text-0); margin-bottom: 3px;
+    }
+    .feature-item p {
+      font-size: 0.82rem; color: var(--text-2); line-height: 1.5;
+    }
+
+    /* ── community links ── */
+    .link-list {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+
+    .link-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 13px; border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-1);
+      color: var(--text-1); font-size: 0.875rem;
+      text-decoration: none;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+    }
+    .link-pill:hover {
+      background: var(--bg-2);
+      color: var(--text-0);
+      border-color: var(--accent);
+      text-decoration: none;
+    }
+    .link-pill svg { color: var(--text-2); flex-shrink: 0; }
+    .link-pill:hover svg { color: var(--accent); }
+
+    /* ── faq ── */
+    .faq-list { display: flex; flex-direction: column; }
+
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+
+    .faq-q {
+      width: 100%; background: none; border: none; cursor: pointer;
+      text-align: left; font-family: inherit;
+      color: var(--text-0); font-size: 0.9rem; font-weight: 500;
+      padding: 13px 0;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      transition: color var(--transition);
+    }
+    .faq-q:hover { color: var(--accent); }
+
+    .faq-chevron {
+      flex-shrink: 0; color: var(--text-2);
+      transition: transform var(--transition);
+    }
+    .faq-item.open .faq-chevron { transform: rotate(180deg); }
+
+    .faq-a {
+      display: none;
+      font-size: 0.875rem; color: var(--text-1);
+      line-height: 1.65; padding-bottom: 14px;
+    }
+    .faq-item.open .faq-a { display: block; }
+
+    /* ── footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 24px;
+      display: flex; align-items: center;
+      justify-content: center;
+      flex-wrap: wrap; gap: 12px;
+      font-size: 0.8rem; color: var(--text-2);
+    }
+    footer a { color: var(--text-2); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+    .sep { opacity: 0.35; }
+
+    /* ── responsive ── */
+    @media (max-width: 520px) {
+      .hero { padding: 40px 0 36px; }
+      nav .nav-link { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- EDIT: header nav links -->
+  <header>
+    <span class="logo">
+      <span class="logo-dot"></span>
+      Paracosm <!-- EDIT: app name -->
+    </span>
+    <div class="header-spacer"></div>
+    <nav>
+      <a class="nav-link" href="#features">features</a>
+      <a class="nav-link" href="#community">community</a>
+      <a class="nav-link" href="#faq">faq</a>
+    </nav>
+    <button class="dark-toggle" id="dark-btn" aria-label="Toggle dark mode">
+      <svg id="dark-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="page">
+
+    <!-- ── HERO ── EDIT: headline, description, button links ── -->
+    <section class="hero">
+      <h1>A system manager<br>for plural systems</h1>
+      <p>
+        Paracosm is a private, local-first tool for tracking alters, fronting history,
+        system boards, and more — all in your browser, no account needed.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="https://paracosm-app.github.io">open the app</a>
+        <a class="btn btn-secondary" href="https://github.com/paracosm-app/paracosm-app.github.io" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.483 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .268.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ── FEATURES ── EDIT: emoji, title, description for each card ── -->
+    <section id="features">
+      <p class="section-title">what's in it</p>
+      <p class="section-sub">everything stays in your browser — nothing is sent anywhere.</p>
+
+      <div class="feature-list">
+
+        <!-- copy/paste feature-item blocks to add more -->
+        <div class="feature-item">
+          <div class="feature-emoji">🌿</div>
+          <h3>Alter profiles</h3>
+          <p>Names, pronouns, roles, proxy tags, colours, and custom fields.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-emoji">✦</div>
+          <h3>Fronting tracker</h3>
+          <p>Log who's fronting and keep a history of switches.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-emoji">📋</div>
+          <h3>System boards</h3>
+          <p>Message boards for notes and communication between members.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-emoji">🔒</div>
+          <h3>Local-first</h3>
+          <p>No account, no server, no tracking. Just your browser.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-emoji">🌙</div>
+          <h3>Accessibility Features</h3>
+          <p>Light & dark mode, text size, font, and many more accessibility options.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-emoji">📦</div>
+          <h3>Import &amp; export</h3>
+          <p>PluralKit, Simply Plural, and Pluralspace import along with a JSON backup built in.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ── COMMUNITY ── EDIT: href for each link, add/remove as needed ── -->
+    <section id="community">
+      <p class="section-title">find us</p>
+      <p class="section-sub">come say hi, ask questions, or report bugs.</p>
+
+      <div class="link-list">
+
+        <a class="link-pill" href="https://discord.gg/cMGz9dYxaS" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03z"/></svg>
+          Discord
+        </a>
+
+        <a class="link-pill" href="https://www.reddit.com/r/paracosmapp/s/8MvHQQWL0D" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+          Reddit
+        </a>
+
+        <a class="link-pill" href="https://www.tumblr.com/paracosm-app" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14.563 24c-5.093 0-7.031-3.756-7.031-6.411V9.747H5.116V6.648c3.63-1.313 4.512-4.596 4.71-6.469C9.84.051 9.941 0 9.999 0h3.517v6.114h4.801v3.633h-4.82v7.47c.016 1.001.375 2.371 2.207 2.371h.09c.631-.02 1.486-.205 1.936-.419l1.156 3.425c-.436.636-2.4 1.374-4.304 1.406-.044.003-.09.003-.128.003z"/></svg>
+          Tumblr
+        </a>
+
+        <a class="link-pill" href="https://github.com/paracosm-app/paracosm-app.github.io" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.483 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.341-3.369-1.341-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .268.18.579.688.481C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+          GitHub
+        </a>
+
+        <a class="link-pill" href="YOUR_DONATE_LINK" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Donate
+        </a>
+
+        
+
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ── FAQ ── EDIT: questions and answers, copy/paste faq-item blocks ── -->
+    <section id="faq">
+      <p class="section-title">faq</p>
+      <p class="section-sub">still curious? ask on Discord.</p>
+
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Is my data private?
+            <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-a">
+            Yes — everything is stored in your browser's localStorage. Nothing is ever sent to a server. Only you can see it.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Do I need an account?
+            <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-a">
+            No account needed. Open the app and start using it.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Can I import from PluralKit?
+            <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-a">
+            Yes. Paste in your Pluralkit token (use pk;token in a server with the Discord bot), and pull in your alters.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Will I lose data if I clear my browser?
+            <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-a">
+            Clearing cookies/localStorage will delete your data. Use Settings → Export regularly to keep a JSON backup you can re-import.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this)">
+            Is this free?
+            <svg class="faq-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-a">
+            Completely free and open source. You can donate to support development if you'd like, but there's no pressure and nothing is paywalled.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <hr class="divider" style="margin-bottom: 0;" />
+
+  </div><!-- /page -->
+
+  <!-- EDIT: footer links -->
+  <footer>
+    <span>© 2026 Paracosm</span>
+    <span class="sep">·</span>
+    <a href="https://github.com/paracosm-app/paracosm-app.github.io">GitHub</a>
+    <span class="sep">·</span>
+    <a href="https://discord.gg/cMGz9dYxaS">Discord</a>
+    <span class="sep">·</span>
+    <a href="YOUR_DONATE_LINK">Donate</a>
+    <span class="sep">·</span>
+  </footer>
+
+  <script>
+    /* dark mode */
+    const html = document.documentElement;
+    const btn  = document.getElementById('dark-btn');
+    const icon = document.getElementById('dark-icon');
+    const sun  = `<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>`;
+    const moon = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>`;
+
+    function setDark(on) {
+      html.setAttribute('data-dark', on ? 'true' : 'false');
+      icon.innerHTML = on ? sun : moon;
+      localStorage.setItem('pc-landing-dark', on ? '1' : '0');
+    }
+
+    const saved = localStorage.getItem('pc-landing-dark');
+    setDark(saved !== null ? saved === '1' : window.matchMedia('(prefers-color-scheme: dark)').matches);
+    btn.addEventListener('click', () => setDark(html.getAttribute('data-dark') !== 'true'));
+
+    /* faq accordion */
+    function toggleFaq(btn) {
+      btn.closest('.faq-item').classList.toggle('open');
+    }
+  </script>
+
+</body>
+</html>
