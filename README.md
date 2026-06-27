@@ -22,7 +22,8 @@ coming in version 1.4.0
 - search bar on front modal
 - quick sync to pluralkit button
 - alter card rework (banner is now visible, moved things around)
-- small visual fixes
+- can now nest more than one reply
+- multiple bug fixes
 
 frequently asked questions
 
