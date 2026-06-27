@@ -17,6 +17,7 @@ key included features:
 
 coming in version 1.4.0
 - alter groups/tags
+- automatically append pronouns to pluralkit display name
 - viewable changelog
 - search bar on front modal
 - quick sync to pluralkit button
