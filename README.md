@@ -2,7 +2,7 @@
 
 hey! my name is ezra, and i am the developer of Paracosm. Paracosm is a website made for systems to log alters, take notes, and stay organized. unlike most system focused apps, Paracosm runs entirely in your browser and stores data locally on your device. no account is required, and nobody, not even me, can access your data other than you.
 
-key included features:
+#### key included features:
 
 - track alters and system members
 - log fronts and co-fronts
@@ -15,10 +15,11 @@ key included features:
 - sync to and from pluralkit with one button
 - lock boards behind a password, and only allow certain alters to see selected boards
 
-coming in version 1.5.0
+#### coming in version 1.5.0
+
 - home page / dashboard with customizable widgets
 
-frequently asked questions
+#### frequently asked questions
 
 Q: is this site open to systems of all origins?
 
