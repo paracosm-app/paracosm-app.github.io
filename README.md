@@ -15,15 +15,8 @@ key included features:
 - sync to and from pluralkit with one button
 - lock boards behind a password, and only allow certain alters to see selected boards
 
-coming in version 1.4.0
-- alter groups/tags
-- automatically append pronouns to pluralkit display name
-- viewable changelog
-- search bar on front modal
-- quick sync to pluralkit button
-- alter card rework (banner is now visible, moved things around)
-- can now nest more than one reply
-- multiple bug fixes
+coming in version 1.5.0
+- home page / dashboard with customizable widgets
 
 frequently asked questions
 
