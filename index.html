@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
- <head>
-<!-- Google tag (gtag.js) -->
+ <head><!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-0WZTBD8NSZ"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -10,9 +9,10 @@
 
   gtag('config', 'G-0WZTBD8NSZ');
 </script>
+
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Paracosm v1.3</title>
+ <title>Paracosm v1.4.0</title>
  <style>
   /* ============================================================
    CSS CUSTOM PROPERTIES & RESET
@@ -104,6 +104,14 @@
    display: flex; align-items: center; gap: 6px;
   }
   .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .logo-version {
+   font-size: 0.62rem; font-weight: 700; letter-spacing: 0.02em;
+   color: var(--accent); background: var(--accent-dim);
+   padding: 2px 7px; border-radius: 20px; flex-shrink: 0;
+  }
+  @media (max-width: 480px) {
+   .logo-version { display: none; }
+  }
 
   #header-spacer { flex: 1; }
 
@@ -134,6 +142,13 @@
   .fm-main-label { display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap; }
   .fm-main-label input { cursor: pointer; accent-color: var(--accent); }
   .front-entry-main-badge { font-weight: 700; }
+  #fm-search-input { margin-bottom: 10px; }
+  .fm-search-wrap { position: relative; margin-bottom: 10px; }
+  .fm-search-wrap svg {
+   position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+   color: var(--text-2); pointer-events: none;
+  }
+  .fm-search-wrap input { padding-left: 32px; }
 
   /* Header buttons */
   .hdr-btn {
@@ -153,9 +168,22 @@
    width: var(--sidebar-w); flex-shrink: 0;
    position: fixed; top: var(--header-h); left: 0; bottom: 0;
    background: var(--bg-1); border-right: 1px solid var(--border);
-   overflow-y: auto; padding: 12px 0;
+   display: flex; flex-direction: column;
    transition: background var(--transition), border-color var(--transition), transform var(--transition);
    z-index: 90;
+  }
+
+  #sidebar-scroll {
+   flex: 1; overflow-y: auto; padding: 12px 0; min-height: 0;
+  }
+
+  .sidebar-footer {
+   flex-shrink: 0; border-top: 1px solid var(--border);
+   padding: 6px 0; background: var(--bg-1);
+  }
+  .sidebar-badge-dot {
+   width: 8px; height: 8px; border-radius: 50%;
+   background: #ef4444; margin-left: auto; flex-shrink: 0;
   }
 
   .sidebar-section { margin-bottom: 4px; }
@@ -212,7 +240,7 @@
   /* Main content */
   #main {
    flex: 1; margin-left: var(--sidebar-w);
-   padding: 24px; max-width: 100%;
+   padding: var(--main-padding, 24px); max-width: 100%;
    min-height: calc(100vh - var(--header-h));
   }
 
@@ -259,7 +287,7 @@
   ============================================================ */
   .card {
    background: var(--bg-1); border-radius: var(--radius);
-   border: 1px solid var(--border); padding: 16px;
+   border: 1px solid var(--border); padding: var(--card-padding, 16px);
    transition: background var(--transition), border-color var(--transition);
    box-shadow: var(--shadow);
   }
@@ -412,7 +440,7 @@
   .post-list { display: flex; flex-direction: column; gap: 10px; }
   .post {
    background: var(--bg-1); border-radius: var(--radius);
-   border: 1px solid var(--border); padding: 14px 16px;
+   border: 1px solid var(--border); padding: var(--post-padding, 14px 16px);
    transition: background var(--transition), border-color var(--transition);
   }
   .post.pinned { border-color: var(--accent); }
@@ -463,6 +491,7 @@
    border: 1px solid var(--border); padding: 16px;
    cursor: pointer; transition: all var(--transition);
    position: relative; overflow: hidden;
+   display: flex; flex-direction: column;
   }
   .alter-card::before {
    content: ''; position: absolute; top: 0; left: 0; right: 0;
@@ -480,6 +509,39 @@
    display: flex; align-items: center; justify-content: center; padding: 0 5px;
    z-index: 2;
   }
+
+  /* ============================================================
+   ALTER GROUPS
+  ============================================================ */
+  .group-section { margin-bottom: 22px; }
+  .group-grid {
+   display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+   gap: 12px; margin-bottom: 4px;
+  }
+  .group-card {
+   background: var(--bg-1); border-radius: var(--radius);
+   border: 1px solid var(--border); border-left: 4px solid var(--accent);
+   padding: 12px 14px; cursor: pointer; transition: all var(--transition);
+   position: relative;
+  }
+  .group-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .group-card-name { font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+  .group-card-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+  .group-card-count { font-size: 0.76rem; color: var(--text-2); margin-top: 4px; }
+  .group-card-desc { font-size: 0.78rem; color: var(--text-2); margin-top: 4px; display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+  .alter-group-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .alter-group-tag { cursor: pointer; }
+  .group-checkbox-list {
+   display: flex; flex-wrap: wrap; gap: 8px;
+   border: 1px solid var(--border); border-radius: var(--radius-sm);
+   padding: 10px; max-height: 160px; overflow-y: auto; background: var(--bg-2);
+  }
+  .group-checkbox-item {
+   display: flex; align-items: center; gap: 6px; font-size: 0.85rem;
+   background: var(--bg-1); border: 1px solid var(--border); border-radius: 20px;
+   padding: 4px 10px 4px 8px; cursor: pointer;
+  }
+  .group-checkbox-item input { cursor: pointer; accent-color: var(--accent); }
 
   /* ---- density switch (alters page toolbar) ---- */
   .density-switch {
@@ -521,9 +583,10 @@
   .alter-pronouns { font-size: 0.78rem; color: var(--text-2); margin-top: 1px; }
   .alter-role { font-size: 0.78rem; margin-top: 4px; }
   .alter-fronting-badge {
-   position: absolute; top: 10px; right: 10px;
    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
    text-transform: uppercase;
+   margin-bottom: 6px; margin-right: 24px; align-self: flex-start;
+   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
   /* Avatar image + fallback (used in cards, view modal, edit form preview) */
@@ -556,15 +619,75 @@
   }
 
   /* ============================================================
-   ALTER VIEW (READ-ONLY DETAIL) MODAL
+   ALTER VIEW (READ-ONLY DETAIL) MODAL — profile-card style
   ============================================================ */
   .modal.modal-lg { max-width: 560px; }
-  .alter-view-banner {
-   width: 100%; height: 110px; object-fit: cover; display: block;
-   border-radius: var(--radius) var(--radius) 0 0;
-   margin: -18px -20px 14px; max-width: calc(100% + 40px);
+  .profile-modal-banner {
+   position: relative; height: 130px;
+   background-size: cover, cover; background-position: center, center;
+   background-repeat: no-repeat, no-repeat;
+   border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0;
   }
-  .alter-view-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .profile-modal-close {
+   position: absolute; top: 10px; right: 10px;
+   width: 30px; height: 30px; border-radius: 50%;
+   background: rgba(0,0,0,0.38); color: #fff; border: none;
+   display: flex; align-items: center; justify-content: center;
+   cursor: pointer; font-size: 0.92rem; line-height: 1;
+   transition: background var(--transition);
+  }
+  .profile-modal-close:hover { background: rgba(0,0,0,0.58); }
+  .profile-modal-archived-tag {
+   position: absolute; top: 10px; left: 10px;
+   background: rgba(0,0,0,0.45); color: #fff;
+   font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+   padding: 3px 10px; border-radius: 20px;
+  }
+  .profile-modal-header {
+   display: flex; align-items: flex-end; gap: 12px;
+   padding: 0 20px; margin-top: -30px; margin-bottom: 14px;
+  }
+  .profile-modal-avatar-ring {
+   border-radius: 50%; background: var(--bg-1); padding: 4px;
+   box-shadow: 0 0 0 1px var(--border); flex-shrink: 0;
+  }
+  .profile-modal-titles { min-width: 0; padding-bottom: 3px; }
+  .profile-modal-name {
+   font-size: 1.2rem; font-weight: 800; line-height: 1.22;
+   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .profile-modal-realname { font-size: 0.78rem; color: var(--text-2); margin-top: 1px; }
+  .profile-modal-front-pill {
+   margin-left: auto; flex-shrink: 0; font-weight: 700; white-space: nowrap;
+  }
+  .profile-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .profile-pill {
+   display: inline-flex; align-items: center; gap: 5px;
+   padding: 4px 11px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+   background: var(--bg-2); color: var(--text-1);
+  }
+  .profile-pill-swatch {
+   width: 11px; height: 11px; border-radius: 50%; display: inline-block;
+   border: 1px solid rgba(0,0,0,0.15);
+  }
+  .profile-section { margin-bottom: 16px; }
+  .profile-section:last-of-type { margin-bottom: 0; }
+  .profile-section-label {
+   font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+   text-transform: uppercase; color: var(--text-2); margin-bottom: 6px;
+  }
+  .profile-section-body {
+   background: var(--bg-2); border-radius: var(--radius-sm); padding: 10px 12px;
+   font-size: 0.9rem; white-space: pre-wrap; word-break: break-word;
+  }
+  .profile-field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 8px; }
+  .profile-field-chip { background: var(--bg-2); border-radius: var(--radius-sm); padding: 8px 10px; }
+  .profile-field-chip-label {
+   font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+   color: var(--text-2); margin-bottom: 2px;
+  }
+  .profile-field-chip-value { font-size: 0.88rem; font-weight: 600; color: var(--text-0); }
+  .profile-footnote { font-size: 0.78rem; color: var(--text-2); }
   .detail-row { margin-bottom: 14px; }
   .detail-row:last-child { margin-bottom: 0; }
   .detail-label {
@@ -787,8 +910,27 @@
   }
 
   /* ============================================================
-   BACKUP REMINDER BANNER
+   POST SEARCH
   ============================================================ */
+  .post-search-bar {
+   display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap;
+   background: var(--bg-1); border: 1.5px solid var(--border);
+   border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px;
+   box-shadow: var(--shadow);
+  }
+  .post-search-bar.active { border-color: var(--accent); }
+  .post-search-field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 140px; }
+  .post-search-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-2); }
+  .post-search-chip {
+   display: inline-flex; align-items: center; gap: 4px;
+   background: var(--accent-dim); color: var(--accent);
+   border-radius: 20px; padding: 3px 10px; font-size: 0.8rem; font-weight: 600;
+  }
+  .post-search-chip button { background: none; border: none; cursor: pointer; color: var(--accent); font-size: 0.9rem; line-height: 1; padding: 0 1px; }
+  .post-search-results-banner {
+   font-size: 0.82rem; color: var(--text-2); padding: 4px 0 10px;
+   display: flex; align-items: center; gap: 10px;
+  }
   .backup-banner {
    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
    background: var(--accent-dim); border: 1px solid var(--accent);
@@ -939,6 +1081,36 @@
     border-left: 2px solid var(--accent); /* Visual link to parent */
     padding-left: 12px;
 }
+
+/* Reddit-style nested reply threading */
+.post-thread-line {
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+    border-radius: 1px;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+.post-thread-line:hover { background: var(--accent); }
+.post-nested {
+    position: relative;
+    padding-left: 28px;
+    margin-top: 4px;
+}
+.post-nest-0 { margin-left: 0; }
+.post-nest-1 { margin-left: 20px; border-left: 2px solid var(--accent); padding-left: 12px; border-radius: 0 var(--radius) var(--radius) 0; }
+.post-nest-2 { margin-left: 16px; border-left: 2px solid var(--accent-dim); padding-left: 12px; border-radius: 0 var(--radius) var(--radius) 0; }
+.post-nest-3 { margin-left: 12px; border-left: 2px solid var(--border); padding-left: 10px; border-radius: 0 var(--radius) var(--radius) 0; }
+.post-nest-deep { margin-left: 8px; border-left: 2px solid var(--border); padding-left: 8px; border-radius: 0 var(--radius) var(--radius) 0; opacity: 0.95; }
+.post-nest-1 { background: var(--bg-1); }
+.post-nest-2 { background: var(--bg-2); }
+.post-nest-3 { background: var(--bg-2); }
+.post-nest-deep { background: var(--bg-3); }
+.reply-cancel-btn { font-size: 0.78rem; color: var(--text-2); background: none; border: none; cursor: pointer; padding: 0 4px; }
+.reply-cancel-btn:hover { color: var(--text-0); }
  </style>
  </head>
  <body>
@@ -969,7 +1141,8 @@
 
  <a class="logo" href="#" onclick="navigate('alters'); return false;">
  <div class="logo-dot" id="logo-dot"></div>
- Paracosm (v1.3)
+ Paracosm
+ <span class="logo-version">v1.4.0</span>
  </a>
 
  <div id="header-spacer"></div>
@@ -1004,6 +1177,7 @@
  SIDEBAR
  ============================================================ -->
  <nav id="sidebar">
+ <div id="sidebar-scroll">
  <!-- Nav -->
  <div class="sidebar-section">
  <button
@@ -1114,10 +1288,11 @@
  </span>
  </button>
  </div>
+ </div>
 
- <hr class="sidebar-divider" />
-
- <div class="sidebar-section">
+ <!-- Pinned footer: stays at the bottom of the sidebar instead of
+   scrolling away under a long boards list. -->
+ <div class="sidebar-footer">
  <button
  class="nav-item"
  id="nav-settings"
@@ -1140,6 +1315,52 @@
  />
  </svg>
  Settings
+ </button>
+ <button
+ class="nav-item"
+ id="nav-pk-sync"
+ onclick="pkQuickSync()"
+ title="Push and pull alters + front history with PluralKit"
+ >
+ <svg
+ class="nav-icon"
+ width="16"
+ height="16"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ stroke-width="2"
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ >
+ <polyline points="23 4 23 10 17 10" />
+ <polyline points="1 20 1 14 7 14" />
+ <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+ </svg>
+ Sync to PluralKit
+ </button>
+ <button
+ class="nav-item"
+ id="nav-changelog"
+ onclick="openChangelogModal()"
+ title="See what's new in Paracosm"
+ >
+ <svg
+ class="nav-icon"
+ width="16"
+ height="16"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ stroke-width="2"
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ >
+ <path d="M9 11l3 3L22 4" />
+ <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+ </svg>
+ What's Changed
+ <span class="sidebar-badge-dot" id="changelog-badge" style="display:none;"></span>
  </button>
  <button
  class="nav-item"
@@ -1249,6 +1470,14 @@
    { id: 'normal', label: 'Normal', val: '1.55' },
    { id: 'relaxed', label: 'Relaxed', val: '1.8' },
    { id: 'loose', label: 'Loose', val: '2.1' }
+  ];
+
+  const PADDING_OPTIONS = [
+   { id: 'none',    label: 'None',    main: '8px',  card: '8px 10px',  post: '8px 10px'  },
+   { id: 'compact', label: 'Compact', main: '16px', card: '12px 14px', post: '10px 12px' },
+   { id: 'normal',  label: 'Normal',  main: '24px', card: '16px',      post: '14px 16px' },
+   { id: 'relaxed', label: 'Relaxed', main: '36px', card: '22px',      post: '20px 22px' },
+   { id: 'spacious',label: 'Spacious',main: '48px', card: '28px',      post: '24px 28px' }
   ];
   function getSystemStats() {
    const stats = {};
@@ -1360,9 +1589,11 @@
    showPronouns: true,
    showRole: true,
    compactPosts: false,
-   mainChangeSplitsHistory: false
+   mainChangeSplitsHistory: false,
+   contentPadding: 'normal'
    },
    alters: [],
+   groups: [],
    boards: [],
    posts: [],
    frontHistory: [],
@@ -1376,6 +1607,7 @@
    alterSort: 'manual',
    showArchivedAlters: false,
    unlockedBoards: [],
+   lastSeenChangelogVersion: null,
    pluralkit: {
    token: '',
    systemId: null,
@@ -1442,12 +1674,21 @@
    if (!Array.isArray(a.proxyTags)) a.proxyTags = [];
    a.proxyTags.forEach(tg => { if (typeof tg.prefix !== 'string') tg.prefix = ''; if (typeof tg.suffix !== 'string') tg.suffix = ''; });
    if (typeof a.keepProxy !== 'boolean') a.keepProxy = false;
+   if (!Array.isArray(a.groupIds)) a.groupIds = [];
+  });
+  if (!Array.isArray(state.groups)) state.groups = [];
+  state.groups.forEach(g => {
+   if (typeof g.name !== 'string') g.name = '';
+   if (typeof g.color !== 'string' || !g.color) g.color = '#7c6fcd';
+   if (typeof g.description !== 'string') g.description = '';
+   if (typeof g.createdAt !== 'number') g.createdAt = Date.now();
   });
   if (state.lastBackupAt === undefined) state.lastBackupAt = null;
   if (state.backupReminderSnoozedUntil === undefined) state.backupReminderSnoozedUntil = null;
   if (!state.pluralkit || typeof state.pluralkit !== 'object') {
    state.pluralkit = { token:'', systemId:null, systemName:null, lastPushedAt:null, lastPulledAt:null };
   }
+  if (state.pluralkit.appendPronounsToDisplayName === undefined) state.pluralkit.appendPronounsToDisplayName = false;
   (state.alters || []).forEach(a => { if (a.pkId === undefined) a.pkId = null; });
   (state.frontHistory || []).forEach(e => { if (e.pkSwitchId === undefined) e.pkSwitchId = null; });
   // --- new feature migrations ---
@@ -1529,6 +1770,8 @@
   function accentText(hex) { return luminance(hex) > 0.45 ? '#111118' : '#ffffff'; }
 
   function getAlter(id) { return state.alters.find(a => a.id === id); }
+  function getGroup(id) { return (state.groups || []).find(g => g.id === id); }
+  function alterGroups(a) { return ((a && a.groupIds) || []).map(getGroup).filter(Boolean); }
   function getBoard(id) { return state.boards.find(b => b.id === id); }
 
   /* ============================================================
@@ -1543,6 +1786,22 @@
    ${hasUrl ? `<img class="alter-avatar-img" src="${esc(a.avatarUrl)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">` : ''}
    <div class="alter-avatar-fallback" style="background:${esc(a.color||'#7c6fcd')};font-size:${Math.round(sizePx*0.45)}px;display:${hasUrl ? 'none' : 'flex'};">${initial}</div>
    </div>`;
+  }
+
+  // Builds the CSS background for the alter detail modal's banner. If the
+  // alter has a banner image set, it's layered on top; either way a soft
+  // gradient in the alter's own colour sits underneath, so the banner area
+  // always shows *something* even when no banner image has been set or the
+  // image fails to load.
+  function alterBannerStyle(a) {
+   const c = (a && a.color) || '#7c6fcd';
+   let rgb = '124,111,205';
+   try { rgb = hexToRgb(c); } catch(e) {}
+   const grad = `linear-gradient(135deg, ${c} 0%, rgba(${rgb},0.45) 100%)`;
+   if (a && a.banner && a.banner.trim()) {
+   return `background-image:url("${esc(a.banner)}"), ${grad};`;
+   }
+   return `background-image:${grad};`;
   }
 
   function proxyTagExample(tag) {
@@ -1666,6 +1925,12 @@
    // Logo dot
    const dot = document.getElementById('logo-dot');
    if (dot) dot.style.background = accent;
+
+   // Padding
+   const pad = PADDING_OPTIONS.find(p => p.id === (s.contentPadding || 'normal')) || PADDING_OPTIONS[2];
+   root.style.setProperty('--main-padding', pad.main);
+   root.style.setProperty('--card-padding', pad.card);
+   root.style.setProperty('--post-padding', pad.post);
 
    // Fronter select color
    const fsel = document.getElementById('fronter-select');
@@ -1872,9 +2137,15 @@
    </div>
    <div class="modal-body">
    <div class="form-hint mb-2">Check everyone currently ${t('fronting')}. Pick one as <strong>Main</strong> — that's who new ${t('posts')} are signed with.</div>
-   <div class="alter-check-list">
+   ${state.alters.length ? `
+   <div class="fm-search-wrap">
+   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+   <input class="form-input" id="fm-search-input" type="text" placeholder="Search ${t('alters')} by name…" oninput="filterFrontManageList(this.value)" />
+   </div>
+   ` : ''}
+   <div class="alter-check-list" id="fm-alter-list">
    ${state.alters.length ? state.alters.map(a => `
-    <div class="alter-check-item front-manage-row">
+    <div class="alter-check-item front-manage-row" data-fm-name="${esc(((a.name||'') + ' ' + (a.displayName||'')).toLowerCase())}">
     <label>
      <input type="checkbox" class="fm-front-cb" value="${esc(a.id)}" ${ids.includes(a.id) ? 'checked' : ''} onchange="onFrontManageCheckChange()" />
      <span class="alter-check-dot" style="background:${esc(a.color)}"></span>
@@ -1887,12 +2158,31 @@
     </div>
    `).join('') : `<div class="text-sm text-muted" style="padding:6px;">No ${t('alters')} yet — add one first.</div>`}
    </div>
+   <div class="text-sm text-muted" id="fm-no-results" style="display:none;padding:6px;">No matches.</div>
    </div>
    <div class="modal-footer">
    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
    <button class="btn btn-primary" onclick="applyFrontManage()">Save</button>
    </div>
    `);
+
+   setTimeout(() => { const el = document.getElementById('fm-search-input'); if (el) el.focus(); }, 50);
+  }
+
+  // Filters the fronting checklist by name/display name as the person types —
+  // mainly useful for larger systems where scrolling to find someone is slow.
+  function filterFrontManageList(query) {
+   const q = (query || '').toLowerCase().trim();
+   const rows = document.querySelectorAll('#fm-alter-list .front-manage-row');
+   let anyVisible = false;
+   rows.forEach(row => {
+   const name = row.getAttribute('data-fm-name') || '';
+   const match = !q || name.includes(q);
+   row.style.display = match ? '' : 'none';
+   if (match) anyVisible = true;
+   });
+   const emptyMsg = document.getElementById('fm-no-results');
+   if (emptyMsg) emptyMsg.style.display = (anyVisible || !rows.length) ? 'none' : '';
   }
 
   function onFrontManageCheckChange() {
@@ -2360,6 +2650,64 @@
 
    container.innerHTML = html;
   }
+
+  /* ============================================================
+   CHANGELOG / "WHAT'S CHANGED"
+   A simple log of updates, shown via the sidebar footer button so
+   people don't have to go hunting for release notes. Add a new entry
+   to the top of CHANGELOG whenever new features ship.
+  ============================================================ */
+  const CHANGELOG = [
+   {
+   version: '1.4.0',
+   date: 'June 28, 2026',
+   changes: [
+    `ability to automatically append pronouns to PK display name`,
+    `redesigned the alter card.`,
+    'changed up the lower buttons; added changelog + sync to pluralkit, also moved the location of the buttons',
+    'hint on custom fields page now only shows once instead of under every custom field',
+    `added a search bar in the pick whos fronting modal`,
+    `various bug fixes`
+   ]
+   }
+  ];
+
+  function latestChangelogVersion() { return (CHANGELOG[0] && CHANGELOG[0].version) || ''; }
+  function hasUnseenChangelog() { return state.lastSeenChangelogVersion !== latestChangelogVersion(); }
+
+  function updateChangelogBadge() {
+   const el = document.getElementById('changelog-badge');
+   if (el) el.style.display = hasUnseenChangelog() ? 'inline-block' : 'none';
+  }
+
+  function openChangelogModal() {
+   showModal(`
+   <div class="modal-header">
+   <h2>What's Changed</h2>
+   <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+   </div>
+   <div class="modal-body">
+   ${CHANGELOG.map(entry => `
+    <div class="profile-section">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+    <span class="tag">v${esc(entry.version)}</span>
+    <span class="text-sm text-muted">${esc(entry.date)}</span>
+    </div>
+    <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+    ${entry.changes.map(c => `<li class="text-sm">${esc(c)}</li>`).join('')}
+    </ul>
+    </div>
+   `).join('')}
+   </div>
+   <div class="modal-footer">
+   <button class="btn btn-primary" onclick="closeModal()">Got it</button>
+   </div>
+   `);
+   state.lastSeenChangelogVersion = latestChangelogVersion();
+   saveState();
+   updateChangelogBadge();
+  }
+
    /* ============================================================
    RENDER: SYSTEM VIEW
   ============================================================ */
@@ -2385,6 +2733,8 @@
  Add Field
  </button>
  </div>
+
+ ${(state.systemFields || []).length ? `<div class="form-hint mb-2">Each ${t('alter')} fills in their own value for this field on their own card.</div>` : ''}
 
  <div class="custom-fields-list">
 
@@ -2424,8 +2774,6 @@
  onchange="updateFieldOptions('${field.id}', this.value)"
  >
  ` : ''}
-
- <div class="form-hint">Each ${t('alter')} fills in their own value for this field on their own card.</div>
 
  <div class="flex" style="justify-content:flex-end">
  <button
@@ -2868,8 +3216,17 @@
   ${showArchived ? '← Back to ' + t('alters') : '🗄 Archive'}
   </button>
 
+  ${!showArchived ? `<button class="btn btn-secondary btn-sm" onclick="openGroupModal()">New Group</button>` : ''}
   ${!showArchived ? `<button class="btn btn-primary btn-sm" onclick="openAlterModal()">New ${t('alter')}</button>` : ''}
   </div>
+
+  ${(!showArchived && state.groups && state.groups.length) ? `
+  <div class="group-section">
+  <div class="group-grid">
+  ${state.groups.map(g => renderGroupCard(g)).join('')}
+  </div>
+  </div>
+  ` : ''}
 
   ${!alters.length ? `
   <div class="empty-state">
@@ -2928,6 +3285,139 @@
    }
    }
   }
+  function renderGroupCard(g) {
+   const count = state.alters.filter(a => (a.groupIds||[]).includes(g.id) && !a.archived).length;
+   return `
+   <div class="group-card" style="--accent:${esc(g.color)};border-left-color:${esc(g.color)};" onclick="openGroupViewModal('${esc(g.id)}')">
+   <div class="group-card-name"><span class="group-card-dot" style="background:${esc(g.color)}"></span>${esc(g.name || 'Untitled group')}</div>
+   <div class="group-card-count">${count} ${count===1?t('alter'):t('alters')}</div>
+   ${g.description ? `<div class="group-card-desc">${esc(g.description)}</div>` : ''}
+   </div>
+   `;
+  }
+
+  function openGroupModal(id) {
+   const group = id ? getGroup(id) : null;
+   const isEdit = !!group;
+   const g = group || { id: uid(), name: '', color: PRESET_COLORS[Math.floor(Math.random()*PRESET_COLORS.length)], description: '' };
+
+   showModal(`
+   <div class="modal-header">
+   <h2>${isEdit ? 'Edit' : 'New'} Group</h2>
+   <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+   </div>
+   <div class="modal-body">
+   <div class="form-group">
+   <label class="form-label">Name *</label>
+   <input class="form-input" id="g-name" value="${esc(g.name)}" placeholder="e.g. Protectors, Littles…" />
+   </div>
+   <div class="form-group">
+   <label class="form-label">Colour</label>
+   <div class="form-color-row">
+   <input type="color" class="form-color" id="g-color" value="${esc(g.color)}" oninput="syncGroupColorPresets(this.value)" />
+   <div class="color-presets" id="group-presets">
+   ${PRESET_COLORS.map(c=>`<div class="color-preset ${c===g.color?'selected':''}" style="background:${c}" onclick="document.getElementById('g-color').value='${c}';syncGroupColorPresets('${c}')"></div>`).join('')}
+   </div>
+   </div>
+   </div>
+   <div class="form-group">
+   <label class="form-label">Description</label>
+   <textarea class="form-textarea" id="g-desc" placeholder="Optional description…">${esc(g.description||'')}</textarea>
+   </div>
+   ${isEdit ? `
+   <div class="form-group">
+   <label class="form-label">Members</label>
+   <div class="group-checkbox-list">
+   ${state.alters.filter(a=>!a.archived).map(a => `
+    <label class="group-checkbox-item">
+    <input type="checkbox" data-alter-id="${esc(a.id)}" ${ (a.groupIds||[]).includes(g.id) ? 'checked' : '' } onchange="toggleAlterInGroup('${esc(a.id)}','${esc(g.id)}',this.checked)" />
+    ${esc(a.displayName && a.displayName.trim() ? a.displayName.trim() : a.name)}
+    </label>
+   `).join('') || '<span class="text-muted">No alters yet.</span>'}
+   </div>
+   <div class="form-hint">Toggling here saves immediately. You can also assign groups from each ${t('alter')}'s edit screen.</div>
+   </div>
+   ` : ''}
+   </div>
+   <div class="modal-footer">
+   ${isEdit ? `<button class="btn btn-danger btn-sm" onclick="deleteGroup('${esc(g.id)}')">Delete</button>` : ''}
+   <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+   <button class="btn btn-primary" onclick="saveGroup('${esc(g.id)}',${isEdit})">Save</button>
+   </div>
+   `);
+  }
+
+  function syncGroupColorPresets(color) {
+   document.querySelectorAll('#group-presets .color-preset').forEach(el => {
+   const c = el.style.background;
+   el.classList.toggle('selected', c === color || el.style.backgroundColor === color);
+   });
+  }
+
+  function toggleAlterInGroup(alterId, groupId, checked) {
+   const a = getAlter(alterId);
+   if (!a) return;
+   if (!Array.isArray(a.groupIds)) a.groupIds = [];
+   if (checked && !a.groupIds.includes(groupId)) a.groupIds.push(groupId);
+   if (!checked) a.groupIds = a.groupIds.filter(id => id !== groupId);
+   saveState();
+  }
+
+  function saveGroup(id, isEdit) {
+   const name = document.getElementById('g-name').value.trim();
+   if (!name) { alert('Name is required.'); return; }
+   const existing = isEdit ? (getGroup(id) || {}) : {};
+   const group = {
+   ...existing,
+   id,
+   name,
+   color: document.getElementById('g-color').value,
+   description: document.getElementById('g-desc').value.trim(),
+   createdAt: existing.createdAt || Date.now()
+   };
+   if (!Array.isArray(state.groups)) state.groups = [];
+   if (isEdit) {
+   const idx = state.groups.findIndex(g => g.id === id);
+   if (idx >= 0) state.groups[idx] = group; else state.groups.push(group);
+   } else {
+   state.groups.push(group);
+   }
+   saveState(); closeModal(); renderAll();
+  }
+
+  function deleteGroup(id) {
+   if (!confirm('Delete this group? This will remove it from any alters in it, but the alters themselves stay.')) return;
+   state.groups = (state.groups || []).filter(g => g.id !== id);
+   state.alters.forEach(a => { a.groupIds = (a.groupIds || []).filter(gid => gid !== id); });
+   saveState(); closeModal(); renderAll();
+  }
+
+  function openGroupViewModal(id) {
+   const g = getGroup(id);
+   if (!g) return;
+   const members = state.alters.filter(a => (a.groupIds||[]).includes(id));
+   showModal(`
+   <div class="modal-header">
+   <h2 style="display:flex;align-items:center;gap:8px;"><span class="group-card-dot" style="background:${esc(g.color)}"></span>${esc(g.name)}</h2>
+   <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+   </div>
+   <div class="modal-body">
+   ${g.description ? `<div class="detail-row"><div class="detail-label">Description</div><div class="detail-value detail-value-pre">${esc(g.description)}</div></div>` : ''}
+   <div class="detail-row">
+   <div class="detail-label">Members</div>
+   <div class="detail-value">
+   ${members.length ? members.map(a => `<span class="tag" style="margin:2px 4px 2px 0;cursor:pointer;background:${esc(a.color)}28;color:${esc(a.color)};" onclick="openAlterViewModal('${esc(a.id)}')">${esc(a.displayName && a.displayName.trim() ? a.displayName.trim() : a.name)}</span>`).join('') : '<span class="text-muted">No alters in this group yet.</span>'}
+   </div>
+   </div>
+   </div>
+   <div class="modal-footer">
+   <button class="btn btn-danger btn-sm" onclick="deleteGroup('${esc(g.id)}')">Delete</button>
+   <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+   <button class="btn btn-primary" onclick="openGroupModal('${esc(g.id)}')">Edit</button>
+   </div>
+   `);
+  }
+
   function renderAlterCard(a, density) {
    density = density || ALTER_DENSITY[state.alterDensity || 'comfy'];
    const frontIds = getFrontingIds();
@@ -3025,72 +3515,75 @@
    const isMain = a.id === state.activeFronterId;
    const postCount = state.posts.filter(p => p.alterId === a.id).length;
    const hasDisplayName = a.displayName && a.displayName.trim() && a.displayName.trim() !== a.name;
+   const displayTitle = hasDisplayName ? a.displayName.trim() : a.name;
 
    showModal(`
-   <div class="modal-header">
-   <h2>${cap(t('alter'))} Details</h2>
-   <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+   <div class="profile-modal-banner" style="${alterBannerStyle(a)}">
+   <button class="profile-modal-close" onclick="closeModal()" title="Close" aria-label="Close">✕</button>
+   ${a.archived ? `<span class="profile-modal-archived-tag">Archived</span>` : ''}
    </div>
-   <div class="modal-body">
-   ${a.banner && a.banner.trim() ? `<img src="${esc(a.banner)}" alt="" class="alter-view-banner" onerror="this.remove()">` : ''}
-   <div class="alter-view-head">
-   ${alterAvatarHTML(a, 64)}
-   <div style="min-width:0">
-   <div style="font-size:1.15rem;font-weight:700;line-height:1.25;">${esc(hasDisplayName ? a.displayName.trim() : a.name)}</div>
-   ${hasDisplayName ? `<div class="alter-realname" style="font-size:0.8rem;">${esc(a.name)}</div>` : ''}
-   ${a.pronouns ? `<div class="alter-pronouns">${esc(a.pronouns)}</div>` : ''}
+   <div class="profile-modal-header">
+   <div class="profile-modal-avatar-ring">${alterAvatarHTML(a, 64)}</div>
+   <div class="profile-modal-titles">
+   <div class="profile-modal-name">${esc(displayTitle)}</div>
+   ${hasDisplayName ? `<div class="profile-modal-realname">${esc(a.name)}</div>` : ''}
    </div>
+   ${isFronting ? `<span class="tag profile-modal-front-pill" style="background:${esc(a.color)}28;color:${esc(a.color)};">${isMain ? '⭐ Main' : '🟢 ' + cap(t('fronting'))}</span>` : ''}
    </div>
 
-   ${a.role ? `<div class="detail-row"><div class="detail-label">${cap(t('role'))}</div><div class="detail-value" style="color:${esc(a.color)};font-weight:600;">${esc(a.role)}</div></div>` : ''}
+   <div class="modal-body" style="padding-top:0;">
+   <div class="profile-pills">
+   ${a.pronouns ? `<span class="profile-pill">${esc(a.pronouns)}</span>` : ''}
+   ${a.role ? `<span class="profile-pill" style="background:${esc(a.color)}1f;color:${esc(a.color)};">🎭 ${esc(a.role)}</span>` : ''}
+   ${a.birthday ? `<span class="profile-pill">🎂 ${esc(formatBirthday(a.birthday))}</span>` : ''}
+   <span class="profile-pill"><span class="profile-pill-swatch" style="background:${esc(a.color)}"></span>${esc((a.color||'').toUpperCase())}</span>
+   </div>
 
    ${(a.unreadBoardIds && a.unreadBoardIds.length) ? `
-   <div class="detail-row">
-   <div class="detail-label">Unread</div>
-   <div class="detail-value">
+   <div class="profile-section">
+   <div class="profile-section-label">Unread</div>
    ${a.unreadBoardIds.map(bid => { const b = getBoard(bid); return b ? `<span class="tag" style="margin:2px 4px 2px 0;cursor:pointer;" onclick="closeModal();navigate('board','${esc(bid)}')">${esc(b.name)}</span>` : ''; }).join('')}
-   </div>
    </div>
    ` : ''}
 
-   <div class="detail-row">
-   <div class="detail-label">Colour</div>
-   <div class="detail-value" style="display:flex;align-items:center;gap:8px;">
-   <span style="width:15px;height:15px;border-radius:50%;background:${esc(a.color)};display:inline-block;border:1px solid var(--border);flex-shrink:0;"></span>
-   ${esc((a.color||'').toUpperCase())}
-   </div>
-   </div>
-
-   ${a.birthday ? `<div class="detail-row"><div class="detail-label">Birthday</div><div class="detail-value">🎂 ${esc(formatBirthday(a.birthday))}</div></div>` : ''}
-
-   <div class="detail-row">
-   <div class="detail-label">Proxy Tags</div>
-   <div class="detail-value">
-   ${(a.proxyTags && a.proxyTags.length) ? `<div class="alter-proxy-tags" style="margin-top:0;">${renderProxyTagChips(a.proxyTags)}</div>` : `<span class="text-muted">None set</span>`}
-   ${(a.proxyTags && a.proxyTags.length) ? `<div class="form-hint mt-1">${a.keepProxy ? 'Keeps' : 'Strips'} the proxy tags in the proxied message.</div>` : ''}
-   </div>
+   <div class="profile-section">
+   <div class="profile-section-label">Proxy Tags</div>
+   ${(a.proxyTags && a.proxyTags.length) ? `
+   <div class="alter-proxy-tags" style="margin-top:0;">${renderProxyTagChips(a.proxyTags)}</div>
+   <div class="form-hint mt-1">${a.keepProxy ? 'Keeps' : 'Strips'} the proxy tags in the proxied message.</div>
+   ` : `<span class="text-muted text-sm">None set</span>`}
    </div>
 
-   ${a.notes ? `<div class="detail-row"><div class="detail-label">Description</div><div class="detail-value detail-value-pre">${esc(a.notes)}</div></div>` : ''}
+   ${a.notes ? `
+   <div class="profile-section">
+   <div class="profile-section-label">Description</div>
+   <div class="profile-section-body">${esc(a.notes)}</div>
+   </div>` : ''}
 
    ${(state.systemFields && state.systemFields.length) ? `
-   <div class="detail-row">
-   <div class="detail-label">Custom Fields</div>
-   <div class="detail-value">
+   <div class="profile-section">
+   <div class="profile-section-label">Custom Fields</div>
+   <div class="profile-field-grid">
    ${state.systemFields.map(field => {
     const val = getAlterFieldValue(a, field.id);
-    const display = field.type === 'checkbox' ? (val === 'true' ? 'Yes' : 'No') : (val ? esc(val) : '<span class="text-muted">—</span>');
-    return `<div style="display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--border);"><span class="text-muted">${esc(field.name || 'Untitled field')}</span><span>${display}</span></div>`;
+    const display = field.type === 'checkbox' ? (val === 'true' ? 'Yes' : 'No') : (val ? esc(val) : '—');
+    return `<div class="profile-field-chip"><div class="profile-field-chip-label">${esc(field.name || 'Untitled field')}</div><div class="profile-field-chip-value">${display}</div></div>`;
    }).join('')}
    </div>
    </div>` : ''}
 
-   <div class="detail-row">
-   <div class="detail-label">${cap(t('posts'))}</div>
-   <div class="detail-value">${postCount} ${t('posts')} · created ${fmt(a.createdAt)}</div>
+   ${(a.groupIds && a.groupIds.length) ? `
+   <div class="profile-section">
+   <div class="profile-section-label">Groups</div>
+   <div class="alter-group-tags">
+   ${alterGroups(a).map(g => `<span class="tag alter-group-tag" style="background:${esc(g.color)}28;color:${esc(g.color)};" onclick="closeModal();openGroupViewModal('${esc(g.id)}')">${esc(g.name)}</span>`).join('')}
    </div>
+   </div>
+   ` : ''}
 
-   ${a.pkId ? `<div class="form-hint">Linked to PluralKit member <code>${esc(a.pkId)}</code>.</div>` : ''}
+   <div class="profile-section">
+   <div class="profile-footnote">${postCount} ${t('posts')} · created ${fmt(a.createdAt)}${a.pkId ? ` · linked to PluralKit member <code>${esc(a.pkId)}</code>` : ''}</div>
+   </div>
    </div>
    <div class="modal-footer" style="justify-content:space-between;flex-wrap:wrap;">
    <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -3111,6 +3604,82 @@
   }
 
   /* ============================================================
+   POST SEARCH
+  ============================================================ */
+  function togglePostSearch() {
+   postSearch.open = !postSearch.open;
+   renderBoard();
+   if (postSearch.open) {
+   setTimeout(() => { const el = document.getElementById('ps-query'); if (el) el.focus(); }, 50);
+   }
+  }
+
+  function applyPostSearch() {
+   postSearch.query   = (document.getElementById('ps-query')   || {}).value || '';
+   postSearch.alterId = (document.getElementById('ps-alter')   || {}).value || '';
+   postSearch.dateFrom= (document.getElementById('ps-datefrom')|| {}).value || '';
+   postSearch.dateTo  = (document.getElementById('ps-dateto')  || {}).value || '';
+   renderBoard();
+  }
+
+  function clearPostSearch() {
+   postSearch = { query: '', alterId: '', dateFrom: '', dateTo: '', open: false };
+   renderBoard();
+  }
+
+  function filterPostsBySearch(posts) {
+   let list = [...posts];
+   const q = postSearch.query.trim().toLowerCase();
+   if (q) list = list.filter(p => p.content && p.content.toLowerCase().includes(q));
+   if (postSearch.alterId) list = list.filter(p => p.alterId === postSearch.alterId);
+   if (postSearch.dateFrom) {
+   const from = new Date(postSearch.dateFrom).getTime();
+   if (!isNaN(from)) list = list.filter(p => p.timestamp >= from);
+   }
+   if (postSearch.dateTo) {
+   const to = new Date(postSearch.dateTo).getTime() + 86399999; // end of that day
+   if (!isNaN(to)) list = list.filter(p => p.timestamp <= to);
+   }
+   return list;
+  }
+
+  function hasActivePostSearch() {
+   return !!(postSearch.query || postSearch.alterId || postSearch.dateFrom || postSearch.dateTo);
+  }
+
+  function renderPostSearchBar(board) {
+   const boardAlters = [...new Set(state.posts.filter(p=>p.boardId===board.id).map(p=>p.alterId))].map(id=>getAlter(id)).filter(Boolean);
+   const isActive = hasActivePostSearch();
+   return `
+   <div class="post-search-bar ${isActive ? 'active' : ''}" id="post-search-panel">
+   <div class="post-search-field">
+    <span class="post-search-label">Contains</span>
+    <input class="form-input" id="ps-query" placeholder="Search text…" value="${esc(postSearch.query)}" oninput="applyPostSearch()" />
+   </div>
+   <div class="post-search-field" style="min-width:130px;max-width:180px;">
+    <span class="post-search-label">${cap(t('alter'))}</span>
+    <select class="form-select" id="ps-alter" onchange="applyPostSearch()">
+    <option value="">Any</option>
+    ${boardAlters.map(a=>`<option value="${esc(a.id)}" ${postSearch.alterId===a.id?'selected':''}>${esc(a.name)}</option>`).join('')}
+    </select>
+   </div>
+   <div class="post-search-field" style="min-width:130px;max-width:160px;">
+    <span class="post-search-label">From date</span>
+    <input class="form-input" type="date" id="ps-datefrom" value="${esc(postSearch.dateFrom)}" onchange="applyPostSearch()" />
+   </div>
+   <div class="post-search-field" style="min-width:130px;max-width:160px;">
+    <span class="post-search-label">To date</span>
+    <input class="form-input" type="date" id="ps-dateto" value="${esc(postSearch.dateTo)}" onchange="applyPostSearch()" />
+   </div>
+   <div style="display:flex;align-items:flex-end;gap:6px;padding-bottom:1px;">
+    ${isActive ? `<button class="btn btn-secondary btn-sm" onclick="clearPostSearch()">Clear</button>` : ''}
+    <button class="btn btn-ghost btn-sm" onclick="togglePostSearch()">✕ Close</button>
+   </div>
+   </div>
+   `;
+  }
+
+  /* ============================================================
    RENDER: BOARD VIEW
   ============================================================ */
   function renderBoard() {
@@ -3120,6 +3689,12 @@
 
    const fronter = getAlter(state.activeFronterId);
    const boardPosts = state.posts.filter(p => p.boardId === board.id);
+   const isSearching = hasActivePostSearch();
+   let postsToShow;
+   if (isSearching) {
+   // In search mode: flat list of matching posts (no threading), newest first
+   postsToShow = filterPostsBySearch(boardPosts).sort((a,b) => b.timestamp - a.timestamp);
+   } else {
    const topLevel = boardPosts
    .filter(p => !p.parentId)
    .sort((a,b) => {
@@ -3129,7 +3704,8 @@
    const repliesOf = (id) => boardPosts
    .filter(p => p.parentId === id)
    .sort((a,b) => a.timestamp - b.timestamp);
-   const posts = topLevel.flatMap(p => [p, ...repliesOf(p.id)]);
+   postsToShow = buildThreadedPostList(topLevel, boardPosts);
+   }
 
    const boardColor = board.color || '#7c6fcd';
 
@@ -3138,6 +3714,9 @@
    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
    <div style="width:12px;height:12px;border-radius:50%;background:${boardColor};flex-shrink:0;"></div>
    <h1 style="flex:1">${esc(board.name)}</h1>
+   <button class="btn btn-ghost btn-sm ${hasActivePostSearch()?'':''}${postSearch.open?' btn-primary':''}" onclick="togglePostSearch()" title="Search posts">
+    🔍 Search${hasActivePostSearch() ? ' ●' : ''}
+   </button>
    <button class="btn btn-ghost btn-sm" onclick="openBoardModal('${esc(board.id)}')">Edit ${cap(t('board'))}</button>
   <button
    class="btn btn-ghost btn-sm"
@@ -3148,6 +3727,8 @@
    </div>
    ${board.description ? `<p class="text-sm text-muted mt-1">${esc(board.description)}</p>` : ''}
    </div>
+
+   ${postSearch.open ? renderPostSearchBar(board) : ''}
 
    ${fronter ? `
    <div class="compose-box">
@@ -3167,33 +3748,57 @@
    </div>
    `}
 
-   ${!posts.length ? `
+   ${!postsToShow.length ? `
    <div class="empty-state">
    <div class="empty-icon">◈</div>
-   <div class="empty-title">No ${t('posts')} yet</div>
-   <div class="empty-desc">${fronter ? 'Be the first to post something.' : `Set who is ${t('fronting')} and start posting.`}</div>
+   <div class="empty-title">${isSearching ? 'No matching posts' : `No ${t('posts')} yet`}</div>
+   <div class="empty-desc">${isSearching ? 'Try adjusting your search filters.' : (fronter ? 'Be the first to post something.' : `Set who is ${t('fronting')} and start posting.`)}</div>
+   ${isSearching ? `<button class="btn btn-secondary btn-sm" onclick="clearPostSearch()">Clear search</button>` : ''}
    </div>
    ` : `
+   ${isSearching ? `<div class="post-search-results-banner">Showing <strong>${postsToShow.length}</strong> matching ${postsToShow.length===1?t('post'):t('posts')} <button class="btn btn-ghost btn-sm" onclick="clearPostSearch()">Clear</button></div>` : ''}
    <div class="post-list">
-   ${posts.map(p => renderPost(p)).join('')}
+   ${postsToShow.map(item => renderPost(item.post, item.depth)).join('')}
    </div>
    `}
    `;
   }
 
-  function renderPost(p) {
+  /* ============================================================
+   THREADED POST BUILDER
+   Recursively builds a flat list of { post, depth } objects
+   for Reddit-style nesting. Depth caps visual treatment at 3+.
+  ============================================================ */
+  function buildThreadedPostList(topLevelPosts, allBoardPosts) {
+   const result = [];
+   function walk(posts, depth) {
+   posts.forEach(p => {
+    result.push({ post: p, depth });
+    const children = allBoardPosts
+    .filter(c => c.parentId === p.id)
+    .sort((a,b) => a.timestamp - b.timestamp);
+    if (children.length) walk(children, depth + 1);
+   });
+   }
+   walk(topLevelPosts, 0);
+   return result;
+  }
+
+  function renderPost(p, depth) {
+   depth = depth || 0;
    const alter = getAlter(p.alterId);
    const name = alter ? alter.name : 'Unknown';
    const color = alter ? (alter.color || '#7c6fcd') : '#7c6fcd';
    const emoji = alter ? (alter.emoji || alter.name[0]) : '?';
    const pronouns = alter ? alter.pronouns : '';
    const compact = state.settings.compactPosts;
+   const nestClass = depth === 0 ? 'post-nest-0' : depth === 1 ? 'post-nest-1' : depth === 2 ? 'post-nest-2' : depth === 3 ? 'post-nest-3' : 'post-nest-deep';
      return `
-   <div class="post ${p.pinned ? 'pinned' : ''} ${p.parentId ? 'is-reply' : ''}" style="${p.pinned ? `border-color:${color};` : ''}">
+   <div class="post ${p.pinned ? 'pinned' : ''} ${nestClass}" style="${p.pinned ? `border-color:${color};` : ''}${depth>0?'margin-top:6px;':''}">
    <div class="post-header">
-   <div class="post-avatar" style="background:${esc(color)}">${esc(emoji)}</div>
+   <div class="post-avatar" style="background:${esc(color)};${depth>0?'width:26px;height:26px;font-size:0.8rem;':''}">${esc(emoji)}</div>
    <div class="post-meta">
-   <div class="post-author" style="color:${esc(color)}">${esc(name)}${p.pinned ? ' <span class="post-pin-icon">📌</span>' : ''}</div>
+   <div class="post-author" style="color:${esc(color)}">${esc(name)}${p.pinned ? ' <span class="post-pin-icon">📌</span>' : ''}${depth>0?` <span class="text-muted" style="font-weight:400;font-size:0.75rem;">↩ reply</span>`:''}</div>
    ${!compact && pronouns && state.settings.showPronouns ? `<div class="post-pronouns">${esc(pronouns)}</div>` : ''}
    </div>
    <span class="post-time">${fmt(p.timestamp)}${p.editedAt ? ' · <span class="text-muted italic">edited</span>' : ''}</span>
@@ -3210,9 +3815,6 @@
    Edit
    </button>
 
-   <!-- <button onclick="toggleReaction('${p.id}','❤️')">
-   ❤️
-   </button> -->
    <div class="post-reactions">
    ${renderReactions(p)}
 
@@ -3231,14 +3833,16 @@
    </button>
    <button class="btn btn-ghost btn-sm" 
    onclick="openReplyComposer('${esc(p.id)}','${esc(name)}');">
-   Reply
+   ↩ Reply
    </button>
   </div>
    </div>
    `;
   }
-  // Add this to your main script
-let currentReplyParentId = null;
+  let currentReplyParentId = null;
+
+  // Post search state
+  let postSearch = { query: '', alterId: '', dateFrom: '', dateTo: '', open: false };
 
 function openReplyComposer(parentId, parentAuthor) {
     currentReplyParentId = parentId;
@@ -3249,15 +3853,31 @@ function openReplyComposer(parentId, parentAuthor) {
         return;
     }
 
-    // 1. Ensure the composer is visible/focused
     const composerInput = document.getElementById('compose-input');
     if (composerInput) {
         composerInput.focus();
         composerInput.placeholder = `Replying to ${parentAuthor}...`;
     }
 
-    // Scroll to the composer
+    // Show reply context banner inside compose box
+    let banner = document.getElementById('reply-banner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'reply-banner';
+        banner.style.cssText = 'font-size:0.82rem;color:var(--text-2);padding:4px 0 6px;display:flex;align-items:center;gap:8px;';
+        composeBox.insertBefore(banner, composerInput);
+    }
+    banner.innerHTML = `↩ Replying to <strong>${esc(parentAuthor)}</strong> <button class="reply-cancel-btn" onclick="cancelReply()">✕ Cancel</button>`;
+
     composeBox.scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelReply() {
+    currentReplyParentId = null;
+    const banner = document.getElementById('reply-banner');
+    if (banner) banner.remove();
+    const input = document.getElementById('compose-input');
+    if (input) { input.placeholder = `Write a post...`; input.focus(); }
 }
 
   function showReactionPicker(postId) {
@@ -3362,6 +3982,8 @@ function openReplyComposer(parentId, parentAuthor) {
    input.value = '';
    input.placeholder = `Write a ${t('post')}...`;
    currentReplyParentId = null;
+   const banner = document.getElementById('reply-banner');
+   if (banner) banner.remove();
 
    renderBoard();
    renderSidebar();
@@ -3433,6 +4055,10 @@ function openReplyComposer(parentId, parentAuthor) {
 
    const lhSwatches = LINE_HEIGHT_OPTIONS.map(f =>
    `<span class="size-swatch ${s.lineHeight===f.id?'selected':''}" onclick="changeSetting('lineHeight','${f.id}');renderSettings()">${f.label}</span>`
+   ).join('');
+
+   const padSwatches = PADDING_OPTIONS.map(f =>
+   `<span class="size-swatch ${(s.contentPadding||'normal')===f.id?'selected':''}" onclick="changeSetting('contentPadding','${f.id}');applyTheme();renderSettings()">${f.label}</span>`
    ).join('');
 
    const termFields = [
@@ -3528,6 +4154,11 @@ function openReplyComposer(parentId, parentAuthor) {
    <div class="form-label">Line Spacing</div>
    <div>${lhSwatches}</div>
    </div>
+   <div class="form-group">
+   <div class="form-label">Content Padding</div>
+   <div>${padSwatches}</div>
+   <div class="form-hint">Controls how much breathing room cards, posts, and the main area get.</div>
+   </div>
    </div>
    <div class="settings-section">
    <h2>Motion & Contrast</h2>
@@ -3599,7 +4230,17 @@ function openReplyComposer(parentId, parentAuthor) {
    <div class="settings-section">
    <h2>${cap(t('alters'))}</h2>
    <p class="text-sm text-muted mb-2">${cap(t('alters'))} are matched to PluralKit members by ID once synced, so repeated pushes/pulls update the same record instead of duplicating it. Pushing creates a new PluralKit member for any local ${t('alter')} that isn't linked yet; pulling creates a new local ${t('alter')} for any PluralKit member that isn't linked yet.</p>
-   <div class="flex gap-2" style="flex-wrap:wrap">
+   <div class="setting-row">
+   <div>
+    <div class="setting-label">Append pronouns to display name</div>
+    <div class="setting-desc">When pushing, formats the PluralKit display name as <strong>Name (pronouns)</strong> — e.g. Ezra (he/him). Same behaviour as Octocon. Only affects the PluralKit display name; local data is unchanged.</div>
+   </div>
+   <label class="toggle">
+    <input type="checkbox" ${pk.appendPronounsToDisplayName ? 'checked' : ''} onchange="state.pluralkit.appendPronounsToDisplayName=this.checked;saveState();">
+    <span class="toggle-slider"></span>
+   </label>
+   </div>
+   <div class="flex gap-2" style="flex-wrap:wrap;margin-top:10px;">
    <button class="btn btn-secondary" onclick="pkPushAlters()">⤴ Push ${cap(t('alters'))} to PluralKit</button>
    <button class="btn btn-secondary" onclick="pkPullAlters()">⤵ Pull ${cap(t('alters'))} from PluralKit</button>
    </div>
@@ -3811,11 +4452,21 @@ function openReplyComposer(parentId, parentAuthor) {
    pkBusy = true;
    setPkStatus('Pushing ' + t('alters') + '…');
    let created = 0, updated = 0, failed = 0;
+   const appendPronouns = !!(state.pluralkit && state.pluralkit.appendPronounsToDisplayName);
    try {
    for (const a of state.alters) {
+    // Build the PK display name. Strip any previously-appended " (pronouns)"
+    // suffix first so repeated pushes don't stack them.
+    const PRONOUN_SUFFIX_RE = /\s*\([^)]+\)\s*$/;
+    let baseName = (a.displayName && a.displayName.trim()) ? a.displayName.trim() : a.name;
+    baseName = baseName.replace(PRONOUN_SUFFIX_RE, '').trim(); // strip old suffix if any
+    let displayName = (a.displayName && a.displayName.trim()) ? a.displayName.trim().replace(PRONOUN_SUFFIX_RE, '').trim() : null;
+    if (appendPronouns && a.pronouns && a.pronouns.trim()) {
+    displayName = `${baseName} (${a.pronouns.trim()})`;
+    }
     const payload = {
     name: a.name,
-    display_name: a.displayName || null,
+    display_name: displayName,
     pronouns: a.pronouns || null,
     color: /^#?[0-9a-fA-F]{6}$/.test(a.color || '') ? a.color.replace('#','').toLowerCase() : null,
     description: a.notes || null,
@@ -4034,6 +4685,31 @@ function openReplyComposer(parentId, parentAuthor) {
    }
   }
 
+  // One-click sidebar shortcut so people don't have to dig into Settings
+  // every time. Chains the same push/pull operations available individually
+  // on the PluralKit settings tab — each one only ever creates or updates,
+  // never deletes, and skips anything already in sync, so it's safe to run
+  // repeatedly back-to-back like this.
+  async function pkQuickSync() {
+   if (!pkConfigured()) {
+   navigate('settings');
+   setTimeout(() => {
+    const btn = document.querySelector('.tab-btn[onclick*="pluralkit"]');
+    showSettingsTab('pluralkit', btn);
+   }, 30);
+   showToast('Connect to PluralKit first, then try Sync again.', 4000);
+   return;
+   }
+   if (pkBusy) { showToast('A sync is already in progress…'); return; }
+   showToast('Syncing with PluralKit…', 2200);
+   await pkPushAlters();
+   await pkPullAlters();
+   await pkPushCurrentFront();
+   await pkPushFrontHistory();
+   await pkPullFrontHistory();
+   showToast('Sync with PluralKit complete ✓', 3000);
+  }
+
   /* ============================================================
    ALTER MODAL
   ============================================================ */
@@ -4185,7 +4861,7 @@ function openReplyComposer(parentId, parentAuthor) {
  function openAlterModal(id) {
    const alter = id ? getAlter(id) : null;
    const isEdit = !!alter;
-   const a = alter || { id: uid(), name: '', displayName: '', pronouns: '', role: '', color: PRESET_COLORS[Math.floor(Math.random()*PRESET_COLORS.length)], emoji: '', avatarUrl: '', banner: '', birthday: '', proxyTags: [], keepProxy: false, notes: '', fieldValues: {} };
+   const a = alter || { id: uid(), name: '', displayName: '', pronouns: '', role: '', color: PRESET_COLORS[Math.floor(Math.random()*PRESET_COLORS.length)], emoji: '', avatarUrl: '', banner: '', birthday: '', proxyTags: [], keepProxy: false, notes: '', fieldValues: {}, groupIds: [] };
    alterModalProxyTagsDraft = JSON.parse(JSON.stringify(a.proxyTags || []));
 
    showModal(`
@@ -4206,9 +4882,9 @@ function openReplyComposer(parentId, parentAuthor) {
    </div>
 
    <div class="form-group">
-   <label class="form-label">Display Name</label>
+   <label class="form-label">Display Name <span class="badge" style="font-size:0.7rem;vertical-align:middle;">Paracosm only</span></label>
    <input class="form-input" id="a-displayname" value="${esc(a.displayName||'')}" placeholder="Shown instead of the name above, if set" />
-   <div class="form-hint">Optional — same idea as PluralKit's display name. Leave blank to just use the name.</div>
+   <div class="form-hint">Optional — shown on alter cards and posts in Paracosm instead of the name above. Leave blank to just use the name. If the PluralKit "append pronouns" setting is on, the PK display name is built separately and never affects what you see here.</div>
    </div>
 
    <div class="form-row">
@@ -4273,6 +4949,20 @@ function openReplyComposer(parentId, parentAuthor) {
    <label class="form-label">Description</label>
    <textarea class="form-textarea" id="a-notes" placeholder="Optional description…">${esc(a.notes)}</textarea>
    </div>
+   ${(state.groups && state.groups.length) ? `
+   <div class="form-group">
+   <label class="form-label">Groups</label>
+   <div class="group-checkbox-list" id="alter-groups-editor">
+   ${state.groups.map(g => `
+   <label class="group-checkbox-item">
+   <input type="checkbox" data-group-id="${esc(g.id)}" ${ (a.groupIds||[]).includes(g.id) ? 'checked' : '' } />
+   <span class="group-card-dot" style="background:${esc(g.color)}"></span>${esc(g.name)}
+   </label>
+   `).join('')}
+   </div>
+   <div class="form-hint">Select which groups this ${t('alter')} belongs to.</div>
+   </div>
+   ` : ''}
    ${(state.systemFields && state.systemFields.length) ? `
    <div class="form-group">
    <label class="form-label">Custom Fields</label>
@@ -4317,6 +5007,7 @@ function openReplyComposer(parentId, parentAuthor) {
    const proxyTags = (alterModalProxyTagsDraft || [])
    .map(tg => ({ prefix: (tg.prefix||'').trim(), suffix: (tg.suffix||'').trim() }))
    .filter(tg => tg.prefix || tg.suffix);
+   const groupIds = Array.from(document.querySelectorAll('#alter-groups-editor input[type="checkbox"]:checked')).map(el => el.getAttribute('data-group-id'));
    const alter = {
    ...existing,
    id,
@@ -4333,6 +5024,7 @@ function openReplyComposer(parentId, parentAuthor) {
    keepProxy: document.getElementById('a-keepproxy').checked,
    notes: document.getElementById('a-notes').value.trim(),
    fieldValues,
+   groupIds,
    archived: existing.archived || false,
    order: existing.order !== undefined ? existing.order : state.alters.length,
    unreadBoardIds: Array.isArray(existing.unreadBoardIds) ? existing.unreadBoardIds : [],
@@ -5241,6 +5933,7 @@ function openReplyComposer(parentId, parentAuthor) {
    renderSidebar();
    applyTheme();
    renderBackupBanner();
+   updateChangelogBadge();
    if (currentView === 'alters') renderAlters();
    else if (currentView === 'board') renderBoard();
    else if (currentView === 'settings') renderSettings();
