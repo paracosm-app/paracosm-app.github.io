@@ -1,18 +1,10 @@
 <!doctype html>
 <html lang="en">
  <head><!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-0WZTBD8NSZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-0WZTBD8NSZ');
-</script>
 
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Paracosm v1.4.0</title>
+ <title>Paracosm v1.4.3</title>
  <style>
   /* ============================================================
    CSS CUSTOM PROPERTIES & RESET
@@ -104,14 +96,6 @@
    display: flex; align-items: center; gap: 6px;
   }
   .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
-  .logo-version {
-   font-size: 0.62rem; font-weight: 700; letter-spacing: 0.02em;
-   color: var(--accent); background: var(--accent-dim);
-   padding: 2px 7px; border-radius: 20px; flex-shrink: 0;
-  }
-  @media (max-width: 480px) {
-   .logo-version { display: none; }
-  }
 
   #header-spacer { flex: 1; }
 
@@ -242,7 +226,57 @@
    flex: 1; margin-left: var(--sidebar-w);
    padding: var(--main-padding, 24px); max-width: 100%;
    min-height: calc(100vh - var(--header-h));
+   transition: margin-left var(--transition);
   }
+
+  /* ============================================================
+   SIDEBAR: ICON RAIL (collapsed) MODE
+  ============================================================ */
+  :root { --rail-w: 60px; }
+  body.sidebar-rail #sidebar { width: var(--rail-w); }
+  body.sidebar-rail #main { margin-left: var(--rail-w); }
+  body.sidebar-rail .sidebar-item-name,
+  body.sidebar-rail .sidebar-section-label span,
+  body.sidebar-rail .sidebar-add,
+  body.sidebar-rail .board-move-buttons,
+  body.sidebar-rail .category-name,
+  body.sidebar-rail .category-actions,
+  body.sidebar-rail .badge,
+  body.sidebar-rail .category-caret,
+  body.sidebar-rail .sidebar-divider {
+   display: none !important;
+  }
+  body.sidebar-rail .sidebar-item,
+  body.sidebar-rail .nav-item {
+   justify-content: center; padding: 10px 0; position: relative;
+  }
+  body.sidebar-rail .sidebar-dot { margin: 0 auto; }
+  body.sidebar-rail .category-header { justify-content: center; padding: 6px 0; }
+  body.sidebar-rail .category-toggle { justify-content: center; }
+  body.sidebar-rail .category-boards { display: none; }
+  body.sidebar-rail .sidebar-section-label { justify-content: center; }
+
+  /* Tooltip for rail mode */
+  body.sidebar-rail .nav-item:hover::after,
+  body.sidebar-rail .sidebar-item:hover::after {
+   content: attr(data-tip);
+   position: absolute; left: calc(100% + 10px); top: 50%;
+   transform: translateY(-50%);
+   background: var(--bg-3); color: var(--text-0);
+   padding: 5px 10px; border-radius: var(--radius-sm);
+   font-size: 0.8rem; white-space: nowrap; z-index: 200;
+   box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+   pointer-events: none;
+  }
+
+  #sidebar-rail-toggle {
+   background: none; border: none; cursor: pointer; color: var(--text-2);
+   padding: 6px; border-radius: var(--radius-sm); display: flex; align-items: center;
+   margin: 4px auto 8px; transition: background var(--transition), color var(--transition), transform var(--transition);
+  }
+  #sidebar-rail-toggle:hover { background: var(--bg-2); color: var(--accent); }
+  body.sidebar-rail #sidebar-rail-toggle svg { transform: rotate(180deg); }
+  @media (max-width: 640px) { #sidebar-rail-toggle { display: none; } }
 
   /* Overlay for mobile sidebar */
   #sidebar-overlay {
@@ -445,12 +479,7 @@
   }
   .post.pinned { border-color: var(--accent); }
   .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .post-avatar {
-   width: 32px; height: 32px; border-radius: 50%;
-   display: flex; align-items: center; justify-content: center;
-   font-size: 1rem; flex-shrink: 0;
-   color: white;
-  }
+  .alter-avatar-wrap.post-avatar { width: 32px; height: 32px; }
   .post-meta { flex: 1; }
   .post-author { font-weight: 700; font-size: 0.9rem; }
   .post-pronouns { font-size: 0.75rem; color: var(--text-2); }
@@ -475,7 +504,81 @@
    color: var(--text-0); font-size: 0.92rem; font-family: inherit;
    resize: none; min-height: 60px; line-height: var(--line-height);
   }
-  .compose-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+  .compose-footer { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; }
+  .compose-footer-left { display: flex; gap: 6px; align-items: center; }
+
+  /* Image upload buttons (alter avatar/banner + composer) */
+  .img-upload-btn {
+   display: inline-flex; align-items: center; gap: 6px;
+   background: var(--bg-2); border: 1px solid var(--border); color: var(--text-1);
+   border-radius: var(--radius-sm); padding: 6px 10px; font-size: 0.8rem;
+   font-family: inherit; cursor: pointer; transition: background var(--transition), color var(--transition);
+   white-space: nowrap;
+  }
+  .img-upload-btn:hover { background: var(--bg-3); color: var(--text-0); }
+  .img-upload-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+  .img-upload-or { font-size: 0.75rem; color: var(--text-2); }
+
+  /* Composer image staging (selected, not-yet-posted images) */
+  .compose-img-stage {
+   display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;
+  }
+  .compose-img-thumb {
+   position: relative; width: 64px; height: 64px; border-radius: var(--radius-sm);
+   overflow: hidden; flex-shrink: 0; border: 1px solid var(--border); background: var(--bg-2);
+  }
+  .compose-img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .compose-img-remove {
+   position: absolute; top: 2px; right: 2px; width: 18px; height: 18px;
+   border-radius: 50%; background: rgba(0,0,0,0.65); color: #fff; border: none;
+   font-size: 0.7rem; line-height: 1; cursor: pointer; display: flex;
+   align-items: center; justify-content: center; padding: 0;
+  }
+  .compose-img-remove:hover { background: rgba(0,0,0,0.85); }
+
+  /* Post image gallery */
+  .post-gallery {
+   display: flex; gap: 8px; overflow-x: auto; margin-top: 10px;
+   margin-bottom: 4px; padding-bottom: 2px; scroll-snap-type: x proximity;
+   -webkit-overflow-scrolling: touch;
+  }
+  .post-gallery::-webkit-scrollbar { height: 6px; }
+  .post-gallery::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .post-gallery.single-image { overflow-x: visible; }
+  .post-gallery-img-wrap {
+   flex-shrink: 0; scroll-snap-align: start; border-radius: var(--radius);
+   overflow: hidden; border: 1px solid var(--border); background: var(--bg-2);
+   cursor: zoom-in; max-height: 280px;
+  }
+  .post-gallery.single-image .post-gallery-img-wrap { max-width: 100%; }
+  .post-gallery:not(.single-image) .post-gallery-img-wrap { width: 200px; height: 200px; }
+  .post-gallery:not(.single-image) .post-gallery-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .post-gallery.single-image .post-gallery-img-wrap img { max-width: 100%; max-height: 280px; object-fit: contain; display: block; }
+  .post-gallery-count {
+   font-size: 0.72rem; color: var(--text-2); margin-top: 2px; margin-bottom: 2px;
+  }
+
+  /* Lightbox for viewing a post image full-size */
+  .img-lightbox-backdrop {
+   position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.85);
+   display: flex; align-items: center; justify-content: center; padding: 24px;
+   cursor: zoom-out;
+  }
+  .img-lightbox-backdrop img {
+   max-width: 100%; max-height: 100%; border-radius: var(--radius);
+   box-shadow: var(--shadow-md);
+  }
+  .img-lightbox-close {
+   position: fixed; top: 16px; right: 20px; background: rgba(0,0,0,0.5); color: #fff;
+   border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.1rem;
+   cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Avatar/banner upload preview tweaks */
+  .alter-upload-preview-banner {
+   width: 100%; height: 80px; border-radius: var(--radius-sm); margin-top: 8px;
+   background-size: cover; background-position: center; border: 1px solid var(--border);
+  }
 
   /* Board header banner */
   .board-banner {
@@ -491,7 +594,6 @@
    border: 1px solid var(--border); padding: 16px;
    cursor: pointer; transition: all var(--transition);
    position: relative; overflow: hidden;
-   display: flex; flex-direction: column;
   }
   .alter-card::before {
    content: ''; position: absolute; top: 0; left: 0; right: 0;
@@ -583,10 +685,9 @@
   .alter-pronouns { font-size: 0.78rem; color: var(--text-2); margin-top: 1px; }
   .alter-role { font-size: 0.78rem; margin-top: 4px; }
   .alter-fronting-badge {
+   position: absolute; top: 10px; right: 10px;
    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em;
    text-transform: uppercase;
-   margin-bottom: 6px; margin-right: 24px; align-self: flex-start;
-   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
 
   /* Avatar image + fallback (used in cards, view modal, edit form preview) */
@@ -1141,8 +1242,7 @@
 
  <a class="logo" href="#" onclick="navigate('alters'); return false;">
  <div class="logo-dot" id="logo-dot"></div>
- Paracosm
- <span class="logo-version">v1.4.0</span>
+ Paracosm (v1.4.3)
  </a>
 
  <div id="header-spacer"></div>
@@ -1177,12 +1277,25 @@
  SIDEBAR
  ============================================================ -->
  <nav id="sidebar">
+ <button
+ id="sidebar-rail-toggle"
+ onclick="toggleSidebarRail()"
+ title="Collapse sidebar"
+ aria-label="Collapse sidebar to icon rail"
+ >
+ <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+ <rect x="3" y="3" width="18" height="18" rx="2"/>
+ <line x1="9" y1="3" x2="9" y2="21"/>
+ <polyline points="14 9 11 12 14 15"/>
+ </svg>
+ </button>
  <div id="sidebar-scroll">
  <!-- Nav -->
  <div class="sidebar-section">
  <button
  class="nav-item"
  id="nav-alters"
+ data-tip="Alters"
  onclick="navigate('alters')"
  >
  <svg
@@ -1207,6 +1320,7 @@
  <button
  class="nav-item"
  id="nav-system"
+ data-tip="System"
  onclick="navigate('system')"
  >
  <svg
@@ -1230,6 +1344,7 @@
    <button
  class="nav-item"
  id="nav-front"
+ data-tip="Front History"
  onclick="navigate('front')"
  ><svg
   class="nav-icon"
@@ -1281,6 +1396,7 @@
  <button
  class="nav-item"
  id="nav-archive"
+ data-tip="Archive"
  onclick="navigate('archive')"
  >
  <span class="sidebar-item-name" id="nav-archive-label">
@@ -1296,6 +1412,7 @@
  <button
  class="nav-item"
  id="nav-settings"
+ data-tip="Settings"
  onclick="navigate('settings')"
  >
  <svg
@@ -1319,6 +1436,7 @@
  <button
  class="nav-item"
  id="nav-pk-sync"
+ data-tip="Sync to PluralKit"
  onclick="pkQuickSync()"
  title="Push and pull alters + front history with PluralKit"
  >
@@ -1342,6 +1460,7 @@
  <button
  class="nav-item"
  id="nav-changelog"
+ data-tip="What's Changed"
  onclick="openChangelogModal()"
  title="See what's new in Paracosm"
  >
@@ -1365,6 +1484,7 @@
  <button
  class="nav-item"
  id="nav-donate"
+ data-tip="Donate"
  onclick="window.location.href='https://cash.app/$ezrapugliese';"
  >
  <svg
@@ -1590,7 +1710,8 @@
    showRole: true,
    compactPosts: false,
    mainChangeSplitsHistory: false,
-   contentPadding: 'normal'
+   contentPadding: 'normal',
+   sidebarCollapsed: false
    },
    alters: [],
    groups: [],
@@ -1645,6 +1766,8 @@
   state.posts.forEach(post => {
    if (!post.reactions)
    post.reactions = {};
+   if (!Array.isArray(post.images))
+   post.images = [];
   });
   if (!Array.isArray(state.frontHistory)) state.frontHistory = [];
   state.frontHistory.forEach(entry => {
@@ -1737,6 +1860,78 @@
    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  /* ============================================================
+   IMAGE UPLOAD HELPERS
+   Reads a File (from the photo library / file picker), downsizes it
+   on a canvas so it doesn't blow out localStorage, and resolves to a
+   compressed base64 data URL we can store directly on alters/posts.
+  ============================================================ */
+  function readImageFileAsDataURL(file, maxDim) {
+   maxDim = maxDim || 1280;
+   return new Promise((resolve, reject) => {
+   if (!file || !file.type || !file.type.startsWith('image/')) {
+    reject(new Error('Not an image file'));
+    return;
+   }
+   const reader = new FileReader();
+   reader.onerror = () => reject(new Error('Could not read file'));
+   reader.onload = (e) => {
+    const img = new Image();
+    img.onerror = () => reject(new Error('Could not decode image'));
+    img.onload = () => {
+    try {
+     let { width, height } = img;
+     if (width > maxDim || height > maxDim) {
+      if (width >= height) { height = Math.round(height * (maxDim / width)); width = maxDim; }
+      else { width = Math.round(width * (maxDim / height)); height = maxDim; }
+     }
+     const canvas = document.createElement('canvas');
+     canvas.width = width; canvas.height = height;
+     const ctx = canvas.getContext('2d');
+     ctx.drawImage(img, 0, 0, width, height);
+     // PNG-with-transparency stays PNG; everything else compresses as JPEG.
+     const isPng = file.type === 'image/png';
+     const dataUrl = isPng ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', 0.82);
+     resolve(dataUrl);
+    } catch (err) { reject(err); }
+    };
+    img.src = e.target.result;
+   };
+   reader.readAsDataURL(file);
+   });
+  }
+
+  // Wires a hidden <input type="file"> (by id) so that picking a file/photo
+  // runs it through readImageFileAsDataURL and hands the resulting data URL
+  // to onResult(dataUrl). Shows a toast on failure. Used by both the
+  // alter avatar/banner pickers and the post composer's image picker.
+  function handleImageInputChange(inputEl, onResult) {
+   const file = inputEl.files && inputEl.files[0];
+   if (!file) return;
+   readImageFileAsDataURL(file).then(onResult).catch(() => {
+   showToast("Couldn't load that image — try a different file.", 4000);
+   }).finally(() => { inputEl.value = ''; });
+  }
+
+  function openImageLightbox(src) {
+   const existing = document.getElementById('img-lightbox');
+   if (existing) existing.remove();
+   const wrap = document.createElement('div');
+   wrap.id = 'img-lightbox';
+   wrap.className = 'img-lightbox-backdrop';
+   wrap.onclick = () => wrap.remove();
+   const closeBtn = document.createElement('button');
+   closeBtn.className = 'img-lightbox-close';
+   closeBtn.innerHTML = '✕';
+   closeBtn.onclick = (e) => { e.stopPropagation(); wrap.remove(); };
+   const img = document.createElement('img');
+   img.src = src;
+   img.onclick = (e) => e.stopPropagation();
+   wrap.appendChild(img);
+   wrap.appendChild(closeBtn);
+   document.body.appendChild(wrap);
+  }
+
   function t(key) { return state.terminology[key] || DEFAULT_TERMINOLOGY[key] || key; }
 
   function cap(str) { return str ? str[0].toUpperCase() + str.slice(1) : ''; }
@@ -1799,7 +1994,8 @@
    try { rgb = hexToRgb(c); } catch(e) {}
    const grad = `linear-gradient(135deg, ${c} 0%, rgba(${rgb},0.45) 100%)`;
    if (a && a.banner && a.banner.trim()) {
-   return `background-image:url("${esc(a.banner)}"), ${grad};`;
+   const safeUrl = esc(a.banner).replace(/'/g, '%27');
+   return `background-image:url('${safeUrl}'), ${grad};`;
    }
    return `background-image:${grad};`;
   }
@@ -2012,6 +2208,15 @@
   function closeSidebar() {
    document.getElementById('sidebar').classList.remove('open');
    document.getElementById('sidebar-overlay').classList.remove('visible');
+  }
+
+  function toggleSidebarRail(force) {
+   const collapsed = typeof force === 'boolean' ? force : !document.body.classList.contains('sidebar-rail');
+   document.body.classList.toggle('sidebar-rail', collapsed);
+   state.settings.sidebarCollapsed = collapsed;
+   const btn = document.getElementById('sidebar-rail-toggle');
+   if (btn) btn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+   saveState();
   }
 
   /* ============================================================
@@ -2658,19 +2863,24 @@
    to the top of CHANGELOG whenever new features ship.
   ============================================================ */
   const CHANGELOG = [
+  {
+   version: '1.4.3',
+   date: 'June 29, 2026',
+   changes: [
+    `added photo upload from device`,
+    `you can now post images in posts`,
+    `fixed various visual bugs`,
+  ]}
    {
    version: '1.4.0',
    date: 'June 28, 2026',
    changes: [
-    `ability to automatically append pronouns to PK display name`,
-    `redesigned the alter card.`,
-    `added alter groups/tags.`,
-    'changed up the lower buttons; added changelog + sync to pluralkit, also moved the location of the buttons',
-    'hint on custom fields page now only shows once instead of under every custom field',
     `added a search bar in the pick whos fronting modal`,
-    `various bug fixes`
-   ]
-   }
+    `redesigned the alter card.`,
+    'changed up the lower buttons; added changelog + sync to pluralkit, also moved the location of the buttons',
+    'hint on custom fields page now only shows once instead of under every custom field'
+   ]}
+
   ];
 
   function latestChangelogVersion() { return (CHANGELOG[0] && CHANGELOG[0].version) || ''; }
@@ -3734,12 +3944,17 @@
    ${fronter ? `
    <div class="compose-box">
    <div class="compose-header">
-   <div class="post-avatar" style="background:${esc(fronter.color)};width:28px;height:28px;font-size:0.85rem;">${esc(fronter.emoji||fronter.name[0])}</div>
+   ${alterAvatarHTML(fronter, 28, 'post-avatar')}
    <span class="compose-as">Posting as <strong style="color:${esc(fronter.color)}">${esc(fronter.name)}</strong></span>
    ${getFrontingIds().length > 1 ? `<span class="text-sm text-muted">· also ${t('fronting')}: ${getFrontingIds().filter(id=>id!==fronter.id).map(id=>esc((getAlter(id)||{}).name||'?')).join(', ')}</span>` : ''}
    </div>
    <textarea id="compose-input" placeholder="Write a ${t('post')}..." rows="3"></textarea>
+   <div id="compose-img-stage" class="compose-img-stage"></div>
+   <input type="file" id="compose-img-file" accept="image/*" multiple class="hidden" onchange="handleComposeImagesSelected(event)" />
    <div class="compose-footer">
+   <div class="compose-footer-left">
+   <button type="button" class="img-upload-btn" onclick="document.getElementById('compose-img-file').click()" title="Add image(s)">📷 Add image</button>
+   </div>
    <button class="btn btn-primary btn-sm" onclick="submitPost()">Post</button>
    </div>
    </div>
@@ -3763,6 +3978,7 @@
    </div>
    `}
    `;
+   renderComposeImageStage();
   }
 
   /* ============================================================
@@ -3785,6 +4001,25 @@
    return result;
   }
 
+  // Renders a post's images. A single image is shown large; 2+ become a
+  // horizontally scrollable little gallery so posts with several photos
+  // don't blow up the feed's vertical rhythm.
+  function renderPostGallery(p) {
+   const images = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
+   if (!images.length) return '';
+   const single = images.length === 1;
+   return `
+   <div class="post-gallery ${single ? 'single-image' : ''}">
+   ${images.map((src) => `
+   <div class="post-gallery-img-wrap" onclick="openImageLightbox('${src.replace(/'/g, "\\'")}')">
+   <img src="${esc(src)}" alt="" loading="lazy" />
+   </div>
+   `).join('')}
+   </div>
+   ${!single ? `<div class="post-gallery-count">${images.length} images — swipe to see more</div>` : ''}
+   `;
+  }
+
   function renderPost(p, depth) {
    depth = depth || 0;
    const alter = getAlter(p.alterId);
@@ -3794,10 +4029,12 @@
    const pronouns = alter ? alter.pronouns : '';
    const compact = state.settings.compactPosts;
    const nestClass = depth === 0 ? 'post-nest-0' : depth === 1 ? 'post-nest-1' : depth === 2 ? 'post-nest-2' : depth === 3 ? 'post-nest-3' : 'post-nest-deep';
+   const avatarSize = depth > 0 ? 26 : 32;
+   const avatarSource = alter || { color, emoji, name, avatarUrl: '' };
      return `
    <div class="post ${p.pinned ? 'pinned' : ''} ${nestClass}" style="${p.pinned ? `border-color:${color};` : ''}${depth>0?'margin-top:6px;':''}">
    <div class="post-header">
-   <div class="post-avatar" style="background:${esc(color)};${depth>0?'width:26px;height:26px;font-size:0.8rem;':''}">${esc(emoji)}</div>
+   ${alterAvatarHTML(avatarSource, avatarSize, 'post-avatar')}
    <div class="post-meta">
    <div class="post-author" style="color:${esc(color)}">${esc(name)}${p.pinned ? ' <span class="post-pin-icon">📌</span>' : ''}${depth>0?` <span class="text-muted" style="font-weight:400;font-size:0.75rem;">↩ reply</span>`:''}</div>
    ${!compact && pronouns && state.settings.showPronouns ? `<div class="post-pronouns">${esc(pronouns)}</div>` : ''}
@@ -3805,6 +4042,7 @@
    <span class="post-time">${fmt(p.timestamp)}${p.editedAt ? ' · <span class="text-muted italic">edited</span>' : ''}</span>
    </div>
    <div class="post-content">${esc(p.content)}</div>
+   ${renderPostGallery(p)}
   <div class="post-actions">
    <button class="btn btn-ghost btn-sm"
    onclick="togglePin('${esc(p.id)}')">
@@ -3841,6 +4079,39 @@
    `;
   }
   let currentReplyParentId = null;
+
+  // Images the user has picked in the composer but not yet posted.
+  // Cleared on successful post, on reply-cancel, and whenever the board re-renders.
+  let composeStagedImages = [];
+
+  function handleComposeImagesSelected(event) {
+   const files = Array.from(event.target.files || []);
+   event.target.value = '';
+   if (!files.length) return;
+   Promise.all(files.map(f => readImageFileAsDataURL(f).catch(() => null)))
+   .then(results => {
+   const ok = results.filter(Boolean);
+   if (ok.length < results.length) showToast('One or more files could not be added.', 3500);
+   composeStagedImages = composeStagedImages.concat(ok);
+   renderComposeImageStage();
+   });
+  }
+
+  function removeComposeStagedImage(idx) {
+   composeStagedImages.splice(idx, 1);
+   renderComposeImageStage();
+  }
+
+  function renderComposeImageStage() {
+   const stage = document.getElementById('compose-img-stage');
+   if (!stage) return;
+   stage.innerHTML = composeStagedImages.map((src, i) => `
+   <div class="compose-img-thumb">
+   <img src="${esc(src)}" alt="" />
+   <button type="button" class="compose-img-remove" onclick="removeComposeStagedImage(${i})" title="Remove">✕</button>
+   </div>
+   `).join('');
+  }
 
   // Post search state
   let postSearch = { query: '', alterId: '', dateFrom: '', dateTo: '', open: false };
@@ -3953,9 +4224,10 @@ function cancelReply() {
   function submitPost() {
    const input = document.getElementById('compose-input');
    const content = input ? input.value.trim() : '';
+   const images = composeStagedImages.slice();
 
    if (
-   !content ||
+   (!content && !images.length) ||
    !state.activeFronterId ||
    !state.currentBoardId
    ) {
@@ -3967,6 +4239,7 @@ function cancelReply() {
    boardId: state.currentBoardId,
    alterId: state.activeFronterId,
    content,
+   images,
    timestamp: Date.now(),
    reactions: {},
    pinned: false,
@@ -3982,6 +4255,7 @@ function cancelReply() {
 
    input.value = '';
    input.placeholder = `Write a ${t('post')}...`;
+   composeStagedImages = [];
    currentReplyParentId = null;
    const banner = document.getElementById('reply-banner');
    if (banner) banner.remove();
@@ -3995,9 +4269,12 @@ function cancelReply() {
    if (p) { p.pinned = !p.pinned; saveState(); renderBoard(); }
   }
 
+  let editPostStagedImages = [];
+
   function openEditPostModal(id) {
    const p = state.posts.find(p => p.id === id);
    if (!p) return;
+   editPostStagedImages = Array.isArray(p.images) ? p.images.slice() : [];
    showModal(`
    <div class="modal-header">
    <h2>Edit ${cap(t('post'))}</h2>
@@ -4007,6 +4284,13 @@ function cancelReply() {
    <div class="form-group">
    <textarea class="form-textarea" id="edit-post-content" style="min-height:120px">${esc(p.content)}</textarea>
    </div>
+   <div class="form-group">
+   <div id="edit-post-img-stage" class="compose-img-stage"></div>
+   <div class="img-upload-row">
+   <button type="button" class="img-upload-btn" onclick="document.getElementById('edit-post-img-file').click()">📷 Add image</button>
+   </div>
+   <input type="file" id="edit-post-img-file" accept="image/*" multiple class="hidden" onchange="handleEditPostImagesSelected(event)" />
+   </div>
    </div>
    <div class="modal-footer">
    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
@@ -4015,6 +4299,36 @@ function cancelReply() {
    `);
    const ta = document.getElementById('edit-post-content');
    if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+   renderEditPostImageStage();
+  }
+
+  function handleEditPostImagesSelected(event) {
+   const files = Array.from(event.target.files || []);
+   event.target.value = '';
+   if (!files.length) return;
+   Promise.all(files.map(f => readImageFileAsDataURL(f).catch(() => null)))
+   .then(results => {
+   const ok = results.filter(Boolean);
+   if (ok.length < results.length) showToast('One or more files could not be added.', 3500);
+   editPostStagedImages = editPostStagedImages.concat(ok);
+   renderEditPostImageStage();
+   });
+  }
+
+  function removeEditPostStagedImage(idx) {
+   editPostStagedImages.splice(idx, 1);
+   renderEditPostImageStage();
+  }
+
+  function renderEditPostImageStage() {
+   const stage = document.getElementById('edit-post-img-stage');
+   if (!stage) return;
+   stage.innerHTML = editPostStagedImages.map((src, i) => `
+   <div class="compose-img-thumb">
+   <img src="${esc(src)}" alt="" />
+   <button type="button" class="compose-img-remove" onclick="removeEditPostStagedImage(${i})" title="Remove">✕</button>
+   </div>
+   `).join('');
   }
 
   function saveEditedPost(id) {
@@ -4022,9 +4336,12 @@ function cancelReply() {
    if (!p) return;
    const ta = document.getElementById('edit-post-content');
    const val = ta ? ta.value.trim() : '';
-   if (!val) { alert(`${cap(t('post'))} can't be empty.`); return; }
-   if (val === p.content) { closeModal(); return; }
+   const existingImages = Array.isArray(p.images) ? p.images : [];
+   const imagesChanged = JSON.stringify(existingImages) !== JSON.stringify(editPostStagedImages);
+   if (!val && !editPostStagedImages.length) { alert(`${cap(t('post'))} can't be empty.`); return; }
+   if (val === p.content && !imagesChanged) { closeModal(); return; }
    p.content = val;
+   p.images = editPostStagedImages.slice();
    p.editedAt = Date.now();
    saveState();
    closeModal();
@@ -4859,6 +5176,17 @@ function cancelReply() {
    }, 44);
   }
 
+  function updateAlterBannerPreview(url) {
+   const preview = document.getElementById('a-banner-preview');
+   if (!preview) return;
+   if (url && url.trim()) {
+   preview.style.backgroundImage = `url('${url.replace(/'/g, "\\'")}')`;
+   preview.style.display = 'block';
+   } else {
+   preview.style.display = 'none';
+   }
+  }
+
  function openAlterModal(id) {
    const alter = id ? getAlter(id) : null;
    const isEdit = !!alter;
@@ -4912,8 +5240,13 @@ function cancelReply() {
 
    <div class="form-row">
    <div class="form-group">
-   <label class="form-label">Avatar URL</label>
+   <label class="form-label">Avatar</label>
    <input class="form-input" id="a-avatar" value="${esc(a.avatarUrl||'')}" placeholder="https://…" oninput="updateAlterAvatarPreview(this.value)" />
+   <div class="img-upload-row">
+   <button type="button" class="img-upload-btn" onclick="document.getElementById('a-avatar-file').click()">📷 Upload photo</button>
+   <span class="img-upload-or">or paste a URL above</span>
+   <input type="file" id="a-avatar-file" accept="image/*" class="hidden" onchange="handleImageInputChange(this, function(dataUrl){ document.getElementById('a-avatar').value = dataUrl; updateAlterAvatarPreview(dataUrl); })" />
+   </div>
    <div class="form-hint">Falls back to the emoji + colour if left blank or it fails to load.</div>
    </div>
    <div id="alter-avatar-preview-wrap" style="flex:0 0 auto;display:flex;align-items:flex-end;padding-bottom:2px;">
@@ -4922,8 +5255,16 @@ function cancelReply() {
    </div>
 
    <div class="form-group">
-   <label class="form-label">Banner URL</label>
-   <input class="form-input" id="a-banner" value="${esc(a.banner||'')}" placeholder="https://…" />
+   <label class="form-label">Banner</label>
+   <input class="form-input" id="a-banner" value="${esc(a.banner||'')}" placeholder="https://…" oninput="updateAlterBannerPreview(this.value)" />
+   <div class="img-upload-row">
+   <button type="button" class="img-upload-btn" onclick="document.getElementById('a-banner-file').click()">📷 Upload photo</button>
+   <span class="img-upload-or">or paste a URL above</span>
+   <input type="file" id="a-banner-file" accept="image/*" class="hidden" onchange="handleImageInputChange(this, function(dataUrl){ document.getElementById('a-banner').value = dataUrl; updateAlterBannerPreview(dataUrl); })" />
+   </div>
+   <div id="alter-banner-preview-wrap">
+   ${a.banner && a.banner.trim() ? `<div class="alter-upload-preview-banner" id="a-banner-preview" style="background-image:url('${esc(a.banner)}')"></div>` : `<div class="alter-upload-preview-banner" id="a-banner-preview" style="display:none;"></div>`}
+   </div>
    <div class="form-hint">Optional — shown at the top of this ${t('alter')}'s detail view.</div>
    </div>
 
@@ -5926,7 +6267,9 @@ function cancelReply() {
    </div>
    `).join('')}
    `;
-  } /* ============================================================
+  } 
+
+  /* ============================================================
    RENDER ALL
   ============================================================ */
   function renderAll() {
@@ -5947,8 +6290,11 @@ function cancelReply() {
    KEYBOARD SHORTCUTS
   ============================================================ */
   document.addEventListener('keydown', function(e) {
-   // Escape closes modal
-   if (e.key === 'Escape') closeModal();
+   // Escape closes modal (or the image lightbox, if that's open)
+   if (e.key === 'Escape') {
+   const lb = document.getElementById('img-lightbox');
+   if (lb) lb.remove(); else closeModal();
+   }
    // Ctrl+Enter submits post
    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
    const input = document.getElementById('compose-input');
@@ -6026,6 +6372,9 @@ function cancelReply() {
    if (!Array.isArray(state.frontHistory)) state.frontHistory = [];
    if (!Array.isArray(state.activeFronterIds)) {
    state.activeFronterIds = state.activeFronterId ? [state.activeFronterId] : [];
+   }
+   if (state.settings.sidebarCollapsed) {
+   document.body.classList.add('sidebar-rail');
    }
    if (!state._frontHistoryChecked) {
    state._frontHistoryChecked = true;
