@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
  <head><!-- Google tag (gtag.js) -->
-<!-- Google tag (gtag.js) -->
+  <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-0WZTBD8NSZ"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -10,9 +10,10 @@
 
   gtag('config', 'G-0WZTBD8NSZ');
 </script>
+
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Paracosm v1.4.3</title>
+ <title>Paracosm v1.5.0</title>
  <style>
   /* ============================================================
    CSS CUSTOM PROPERTIES & RESET
@@ -255,7 +256,8 @@
    display: none !important;
   }
   body.sidebar-rail .sidebar-item,
-  body.sidebar-rail .nav-item {
+  body.sidebar-rail .nav-item,
+  body.sidebar-rail #sidebar-rail-toggle {
    justify-content: center; padding: 10px 0; position: relative;
   }
   body.sidebar-rail .sidebar-dot { margin: 0 auto; }
@@ -279,9 +281,11 @@
 
   #sidebar-rail-toggle {
    background: none; border: none; cursor: pointer; color: var(--text-2);
-   padding: 6px; border-radius: var(--radius-sm); display: flex; align-items: center;
-   margin: 4px auto 8px; transition: background var(--transition), color var(--transition), transform var(--transition);
+   padding: 8px 16px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 10px;
+   width: 100%; text-align: left; font-size: 0.9rem; font-family: inherit;
+   margin: 4px 0 8px; transition: background var(--transition), color var(--transition), transform var(--transition);
   }
+  #sidebar-rail-toggle svg { flex-shrink: 0; }
   #sidebar-rail-toggle:hover { background: var(--bg-2); color: var(--accent); }
   body.sidebar-rail #sidebar-rail-toggle svg { transform: rotate(180deg); }
   @media (max-width: 640px) { #sidebar-rail-toggle { display: none; } }
@@ -319,6 +323,16 @@
    display: inline-block; padding: 1px 8px;
    border-radius: 20px; font-size: 0.72rem; font-weight: 600;
    background: var(--bg-3); color: var(--text-2);
+  }
+
+  .version-pill {
+   display: inline-flex; align-items: center;
+   padding: 1px 9px; margin-left: 2px;
+   border-radius: 20px; font-size: 0.68rem; font-weight: 700;
+   letter-spacing: 0.02em;
+   background: var(--accent-dim); color: var(--accent);
+   border: 1px solid var(--accent);
+   line-height: 1.6;
   }
 
   a { color: var(--accent); text-decoration: none; }
@@ -962,6 +976,145 @@
   }
 
   /* ============================================================
+   DASHBOARD / WIDGETS
+  ============================================================ */
+  #dashboard-grid {
+   position: relative;
+   display: grid;
+   grid-template-columns: repeat(12, 1fr);
+   grid-auto-rows: 56px;
+   gap: 14px;
+   width: 100%;
+  }
+  @media (max-width: 900px) {
+   #dashboard-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+  @media (max-width: 640px) {
+   #dashboard-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+    gap: 12px;
+   }
+   /* Override the inline desktop grid-column/grid-row placement so every
+      widget stacks full-width in document order instead of mimicking the
+      desktop layout's columns/spans/positions. */
+   #dashboard-grid .widget {
+    grid-column: 1 / -1 !important;
+    grid-row: auto !important;
+    min-height: 140px;
+   }
+   #dashboard-grid .widget .widget-body {
+    max-height: none;
+   }
+  }
+
+  .widget {
+   position: relative;
+   border-radius: var(--radius-lg);
+   border: 1px solid var(--widget-border, var(--border));
+   background: var(--widget-bg, var(--bg-1));
+   color: var(--widget-text, var(--text-0));
+   display: flex; flex-direction: column;
+   overflow: hidden;
+   transition: box-shadow var(--transition), border-color var(--transition);
+   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .widget:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.10); }
+  .widget.dragging {
+   opacity: 0.55; box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+   z-index: 50; cursor: grabbing;
+  }
+  .widget.drop-target { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
+
+  .widget-head {
+   display: flex; align-items: center; gap: 8px;
+   padding: 8px 10px 6px 6px; flex-shrink: 0;
+   cursor: grab; user-select: none;
+  }
+  .widget.dragging .widget-head { cursor: grabbing; }
+  .widget-drag-handle {
+   display: flex; align-items: center; color: var(--widget-text, var(--text-2));
+   opacity: 0.55; flex-shrink: 0; cursor: grab;
+  }
+  .widget-icon { font-size: 1rem; flex-shrink: 0; line-height: 1; }
+  .widget-title {
+   flex: 1; font-weight: 700; font-size: 0.85rem;
+   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .widget-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+  .widget-action-btn {
+   background: none; border: none; cursor: pointer;
+   color: var(--widget-text, var(--text-2)); opacity: 0.6;
+   padding: 4px; border-radius: 6px; display: flex; align-items: center;
+   transition: opacity var(--transition), background var(--transition);
+  }
+  .widget-action-btn:hover { opacity: 1; background: rgba(127,127,127,0.15); }
+
+  .widget-body {
+   flex: 1; overflow: auto; padding: 4px 14px 14px;
+   font-size: 0.86rem; min-height: 0;
+  }
+  .widget-body::-webkit-scrollbar { width: 6px; }
+  .widget-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .widget-resize-handle {
+   position: absolute; right: 2px; bottom: 2px;
+   width: 16px; height: 16px; cursor: nwse-resize;
+   display: flex; align-items: flex-end; justify-content: flex-end;
+   color: var(--widget-text, var(--text-2)); opacity: 0;
+   transition: opacity var(--transition);
+   touch-action: none;
+  }
+  .widget:hover .widget-resize-handle { opacity: 0.55; }
+  .widget-resize-handle:hover { opacity: 1 !important; }
+
+  .widget-empty-state {
+   color: var(--widget-text, var(--text-2)); opacity: 0.7;
+   font-size: 0.82rem; font-style: italic; text-align: center;
+   padding: 16px 4px;
+  }
+
+  .dash-stat-big { font-size: 1.9rem; font-weight: 800; line-height: 1.1; }
+  .dash-stat-label { font-size: 0.78rem; opacity: 0.7; margin-top: 2px; }
+  .dash-fronter-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+  .dash-fronter-avatar {
+   width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+   display: flex; align-items: center; justify-content: center; font-size: 0.95rem;
+   color: #fff; font-weight: 700; background-size: cover; background-position: center;
+  }
+  .dash-quick-link-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(86px,1fr)); gap: 8px; }
+  .dash-quick-link {
+   display: flex; flex-direction: column; align-items: center; gap: 4px;
+   padding: 10px 6px; border-radius: var(--radius); background: rgba(127,127,127,0.08);
+   cursor: pointer; border: none; font-family: inherit; color: inherit;
+   font-size: 0.78rem; text-align: center; transition: background var(--transition);
+  }
+  .dash-quick-link:hover { background: rgba(127,127,127,0.18); }
+  .dash-quick-link-dot { width: 14px; height: 14px; border-radius: 50%; }
+
+  .add-widget-card {
+   border: 1.5px dashed var(--border); border-radius: var(--radius);
+   padding: 14px; display: flex; gap: 12px; align-items: flex-start;
+   cursor: pointer; background: none; width: 100%; text-align: left;
+   font-family: inherit; transition: border-color var(--transition), background var(--transition);
+  }
+  .add-widget-card:hover { border-color: var(--accent); background: var(--accent-dim); }
+  .add-widget-icon { font-size: 1.6rem; line-height: 1; }
+  .add-widget-card-title { font-weight: 700; font-size: 0.92rem; }
+  .add-widget-card-desc { font-size: 0.8rem; color: var(--text-2); margin-top: 2px; }
+
+  .widget-color-swatch {
+   width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+   border: 2px solid transparent; flex-shrink: 0; padding: 0;
+   transition: transform var(--transition), border-color var(--transition);
+  }
+  .widget-color-swatch.selected { border-color: var(--text-0); transform: scale(1.12); }
+
+  #dashboard-empty {
+   text-align: center; padding: 60px 20px; color: var(--text-2);
+  }
+
+  /* ============================================================
    REDUCED MOTION
   ============================================================ */
   @media (prefers-reduced-motion: reduce) {
@@ -1248,9 +1401,10 @@
  </svg>
  </button>
 
- <a class="logo" href="#" onclick="navigate('alters'); return false;">
+ <a class="logo" href="#" onclick="navigate('dashboard'); return false;">
  <div class="logo-dot" id="logo-dot"></div>
- Paracosm (v1.4.3)
+ Paracosm
+ <span class="version-pill" id="header-version-pill">v1.5.0</span>
  </a>
 
  <div id="header-spacer"></div>
@@ -1296,10 +1450,38 @@
  <line x1="9" y1="3" x2="9" y2="21"/>
  <polyline points="14 9 11 12 14 15"/>
  </svg>
+ <span class="sidebar-item-name" id="sidebar-rail-toggle-label">Close sidebar</span>
  </button>
  <div id="sidebar-scroll">
  <!-- Nav -->
  <div class="sidebar-section">
+ <button
+ class="nav-item"
+ id="nav-dashboard"
+ data-tip="Dashboard"
+ onclick="navigate('dashboard')"
+ >
+ <svg
+ class="nav-icon"
+ width="16"
+ height="16"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ stroke-width="2"
+ stroke-linecap="round"
+ stroke-linejoin="round"
+ >
+ <rect x="3" y="3" width="7" height="9" rx="1.5" />
+ <rect x="14" y="3" width="7" height="5" rx="1.5" />
+ <rect x="14" y="12" width="7" height="9" rx="1.5" />
+ <rect x="3" y="16" width="7" height="5" rx="1.5" />
+ </svg>
+
+ <span class="sidebar-item-name" id="nav-dashboard-label">
+ Dashboard
+ </span>
+ </button>
  <button
  class="nav-item"
  id="nav-alters"
@@ -1439,7 +1621,7 @@
  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
  />
  </svg>
- Settings
+ <span class="sidebar-item-name">Settings</span>
  </button>
  <button
  class="nav-item"
@@ -1463,7 +1645,7 @@
  <polyline points="1 20 1 14 7 14" />
  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
  </svg>
- Sync to PluralKit
+ <span class="sidebar-item-name">Sync to PluralKit</span>
  </button>
  <button
  class="nav-item"
@@ -1486,7 +1668,7 @@
  <path d="M9 11l3 3L22 4" />
  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
  </svg>
- What's Changed
+ <span class="sidebar-item-name">What's Changed</span>
  <span class="sidebar-badge-dot" id="changelog-badge" style="display:none;"></span>
  </button>
  <button
@@ -1524,7 +1706,7 @@
  d="M14.5 13.5C14.5 12.7 13.4 12 12 12C10.6 12 9.5 12.7 9.5 13.5C9.5 14.3 10.6 15 12 15C13.4 15 14.5 15.7 14.5 16.5C14.5 17.3 13.4 18 12 18C10.6 18 9.5 17.3 9.5 16.5"
  />
  </svg>
- Donate
+ <span class="sidebar-item-name">Donate</span>
  </button>
  </div>
  </nav>
@@ -1534,6 +1716,7 @@
  ============================================================ -->
  <main id="main">
  <div id="backup-banner"></div>
+ <div id="view-dashboard" class="hidden"></div>
  <div id="view-alters"></div>
  <div id="view-board" class="hidden"></div>
  <div id="view-settings" class="hidden"></div>
@@ -1744,6 +1927,7 @@
    lastPushedAt: null,
    lastPulledAt: null
    },
+   dashboard: null,
 
   };
  state.categories = [{ id: 'cat-general', name: 'General', order: 0, collapsed: false }];
@@ -2160,6 +2344,7 @@
    if (boardId) state.currentBoardId = boardId;
 
    // Hide all
+   document.getElementById('view-dashboard').classList.add('hidden');
    document.getElementById('view-alters').classList.add('hidden');
    document.getElementById('view-board').classList.add('hidden');
    document.getElementById('view-settings').classList.add('hidden');
@@ -2170,7 +2355,11 @@
    // Clear nav active states
    document.querySelectorAll('.nav-item, .sidebar-item').forEach(el => el.classList.remove('active'));
 
-   if (view === 'alters') {
+   if (view === 'dashboard') {
+   document.getElementById('view-dashboard').classList.remove('hidden');
+   document.getElementById('nav-dashboard').classList.add('active');
+   renderDashboard();
+   } else if (view === 'alters') {
    document.getElementById('view-alters').classList.remove('hidden');
    document.getElementById('nav-alters').classList.add('active');
    renderAlters();
@@ -2224,6 +2413,8 @@
    state.settings.sidebarCollapsed = collapsed;
    const btn = document.getElementById('sidebar-rail-toggle');
    if (btn) btn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+   const label = document.getElementById('sidebar-rail-toggle-label');
+   if (label) label.textContent = collapsed ? 'Open sidebar' : 'Close sidebar';
    saveState();
   }
 
@@ -2871,26 +3062,34 @@
    to the top of CHANGELOG whenever new features ship.
   ============================================================ */
   const CHANGELOG = [
+   {
+   version: '1.5.0',
+   date: 'June 30, 2026',
+   changes: [
+    'added dashboard with custom widgets',
+    'collapsable sidebar on desktop',
+    'various visual changes'
+   ]
+   },
   {
    version: '1.4.3',
    date: 'June 29, 2026',
    changes: [
-    `added photo upload from device`,
-    `you can now post images in posts`,
-    `fixed various visual bugs`
+    'added photo upload from device',
+    'you can now post images in posts',
+    'fixed various visual bugs'
   ]
   }, 
    {
    version: '1.4.0',
-   date: 'June 28, 2026',
+   date: 'June 26, 2026',
    changes: [
     `added a search bar in the pick whos fronting modal`,
     `redesigned the alter card.`,
     'changed up the lower buttons; added changelog + sync to pluralkit, also moved the location of the buttons',
     'hint on custom fields page now only shows once instead of under every custom field'
    ]
-  },
-
+   }
   ];
 
   function latestChangelogVersion() { return (CHANGELOG[0] && CHANGELOG[0].version) || ''; }
@@ -6277,7 +6476,503 @@ function cancelReply() {
    </div>
    `).join('')}
    `;
-  } 
+  } /* ============================================================
+   DASHBOARD / WIDGETS
+   A customizable home page. Widgets live in state.dashboard.widgets,
+   each with a grid position/size (12-col grid, 56px row height),
+   a type, a color theme, and type-specific config. Drag = move,
+   handle in bottom-right corner = resize. Everything persists via
+   saveState() same as the rest of Paracosm.
+  ============================================================ */
+
+  const WIDGET_TYPES = {
+   welcome:    { label: 'Welcome Banner',     icon: '👋', desc: 'A friendly greeting and system name.', defaultW: 12, defaultH: 2, minW: 4, minH: 2 },
+   fronting:   { label: 'Currently Fronting', icon: '🌀', desc: 'Shows who\'s fronting right now.', defaultW: 4, defaultH: 3, minW: 3, minH: 2 },
+   stats:      { label: 'System Stats',       icon: '📊', desc: 'Quick counts: alters, boards, posts.', defaultW: 4, defaultH: 3, minW: 3, minH: 2 },
+   recentPosts:{ label: 'Recent Posts',       icon: '📝', desc: 'Latest activity across your boards.', defaultW: 5, defaultH: 5, minW: 3, minH: 3 },
+   quickLinks: { label: 'Quick Links',        icon: '🔗', desc: 'One-tap shortcuts to your boards.', defaultW: 4, defaultH: 4, minW: 3, minH: 2 },
+   frontHistory:{ label: 'Recent Switches',   icon: '🕓', desc: 'A short timeline of recent fronting changes.', defaultW: 5, defaultH: 4, minW: 3, minH: 3 },
+   alterRoster:{ label: 'Alter Roster',       icon: '🧑‍🤝‍🧑', desc: 'A compact list of your system\'s alters.', defaultW: 4, defaultH: 5, minW: 3, minH: 3 },
+   note:       { label: 'Sticky Note',        icon: '🗒️', desc: 'A free-text note you can edit anytime.', defaultW: 4, defaultH: 3, minW: 2, minH: 2 },
+   clock:      { label: 'Clock',              icon: '🕰️', desc: 'Current time and date.', defaultW: 3, defaultH: 2, minW: 2, minH: 2 },
+  };
+
+  const WIDGET_COLOR_PRESETS = [
+   null, '#7c6fcd', '#5db8e8', '#4caf82', '#e8a13d', '#e0607a', '#d65d5d', '#9c6bd6', '#2f3542'
+  ];
+
+  function defaultDashboard() {
+   return {
+   widgets: [
+    { id: uid(), type: 'welcome',     x: 0, y: 0,  w: 12, h: 2, color: null, config: {} },
+    { id: uid(), type: 'fronting',    x: 0, y: 2,  w: 4,  h: 3, color: null, config: {} },
+    { id: uid(), type: 'stats',       x: 4, y: 2,  w: 4,  h: 3, color: null, config: {} },
+    { id: uid(), type: 'quickLinks',  x: 8, y: 2,  w: 4,  h: 3, color: null, config: {} },
+    { id: uid(), type: 'recentPosts', x: 0, y: 5,  w: 7,  h: 5, color: null, config: {} },
+    { id: uid(), type: 'frontHistory',x: 7, y: 5,  w: 5,  h: 5, color: null, config: {} },
+   ],
+   nextZ: 1
+   };
+  }
+
+  let dashDrag = null;   // { widgetId, startX, startY, origX, origY, pxPerCol, pxPerRow }
+  let dashResize = null; // { widgetId, startX, startY, origW, origH, pxPerCol, pxPerRow }
+
+  function getWidget(id) { return state.dashboard.widgets.find(w => w.id === id); }
+
+  function widgetColorVars(w) {
+   if (!w.color) return '';
+   let rgb = '124,111,205';
+   try { rgb = hexToRgb(w.color); } catch(e) {}
+   return `--widget-bg:rgba(${rgb},0.13);--widget-border:${esc(w.color)};--widget-text:var(--text-0);`;
+  }
+
+  function renderDashboard() {
+   const container = document.getElementById('view-dashboard');
+   if (!container) return;
+   if (!state.dashboard || !Array.isArray(state.dashboard.widgets)) state.dashboard = defaultDashboard();
+
+   const widgets = state.dashboard.widgets;
+
+   container.innerHTML = `
+    <div class="page-header">
+     <h1>Dashboard</h1>
+     <button class="btn btn-secondary" onclick="openAddWidgetModal()">+ Add Widget</button>
+    </div>
+    ${widgets.length ? `<div id="dashboard-grid"></div>` : `
+     <div id="dashboard-empty">
+      <div style="font-size:2.4rem;margin-bottom:8px;">🗂️</div>
+      <div style="font-weight:700;margin-bottom:4px;">Your dashboard is empty</div>
+      <div class="text-sm" style="margin-bottom:16px;">Add a widget to see your system at a glance.</div>
+      <button class="btn btn-primary" onclick="openAddWidgetModal()">+ Add Widget</button>
+     </div>
+    `}
+   `;
+
+   if (!widgets.length) return;
+
+   const grid = document.getElementById('dashboard-grid');
+   grid.innerHTML = widgets.map(w => renderWidgetShell(w)).join('');
+   widgets.forEach(w => renderWidgetBody(w));
+   attachDashboardDragHandlers();
+  }
+
+  function renderWidgetShell(w) {
+   const meta = WIDGET_TYPES[w.type] || { label: 'Widget', icon: '❔' };
+   return `
+    <div class="widget" id="widget-${esc(w.id)}"
+     style="grid-column:${w.x + 1} / span ${w.w};grid-row:${w.y + 1} / span ${w.h};${widgetColorVars(w)}"
+     data-widget-id="${esc(w.id)}"
+    >
+     <div class="widget-head" data-drag-handle>
+      <span class="widget-drag-handle" title="Drag to move">
+       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="8" cy="6" r="1.6"/><circle cx="16" cy="6" r="1.6"/><circle cx="8" cy="12" r="1.6"/><circle cx="16" cy="12" r="1.6"/><circle cx="8" cy="18" r="1.6"/><circle cx="16" cy="18" r="1.6"/></svg>
+      </span>
+      <span class="widget-title">${esc(widgetTitle(w))}</span>
+      <span class="widget-actions">
+       <button class="widget-action-btn" title="Customize" onclick="event.stopPropagation();openWidgetSettingsModal('${esc(w.id)}')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+       </button>
+       <button class="widget-action-btn" title="Remove widget" onclick="event.stopPropagation();removeWidget('${esc(w.id)}')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+       </button>
+      </span>
+     </div>
+     <div class="widget-body" id="widget-body-${esc(w.id)}"></div>
+     <div class="widget-resize-handle" data-resize-handle title="Drag to resize">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="20" cy="20" r="1.6"/><circle cx="20" cy="13" r="1.6"/><circle cx="13" cy="20" r="1.6"/></svg>
+     </div>
+    </div>
+   `;
+  }
+
+  function widgetTitle(w) {
+   if (w.config && w.config.title) return w.config.title;
+   const meta = WIDGET_TYPES[w.type];
+   return meta ? meta.label : 'Widget';
+  }
+
+  function renderWidgetBody(w) {
+   const el = document.getElementById('widget-body-' + w.id);
+   if (!el) return;
+   switch (w.type) {
+    case 'welcome': el.innerHTML = widgetWelcome(w); break;
+    case 'fronting': el.innerHTML = widgetFronting(w); break;
+    case 'stats': el.innerHTML = widgetStats(w); break;
+    case 'recentPosts': el.innerHTML = widgetRecentPosts(w); break;
+    case 'quickLinks': el.innerHTML = widgetQuickLinks(w); break;
+    case 'frontHistory': el.innerHTML = widgetFrontHistory(w); break;
+    case 'alterRoster': el.innerHTML = widgetAlterRoster(w); break;
+    case 'note': el.innerHTML = widgetNote(w); break;
+    case 'clock': el.innerHTML = widgetClock(w); break;
+    default: el.innerHTML = `<div class="widget-empty-state">Unknown widget</div>`;
+   }
+  }
+
+  function widgetWelcome(w) {
+   const hour = new Date().getHours();
+   const greeting = hour < 5 ? 'Still up' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+   const fronters = state.activeFronterIds.map(id => getAlter(id)).filter(Boolean);
+   const fronterStr = fronters.length ? fronters.map(a => esc(a.name)).join(', ') : 'no one set';
+   return `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;height:100%;flex-wrap:wrap;">
+     <div>
+      <div style="font-size:1.15rem;font-weight:800;">${greeting}, ${esc(state.systemName || 'system')} 👋</div>
+      <div class="text-sm" style="opacity:0.75;margin-top:2px;">Currently fronting: ${fronterStr}</div>
+     </div>
+    </div>
+   `;
+  }
+
+  function widgetFronting(w) {
+   const fronters = state.activeFronterIds.map(id => getAlter(id)).filter(Boolean);
+   if (!fronters.length) return `<div class="widget-empty-state">No one is currently set as fronting.</div>`;
+   return fronters.map(a => {
+    const hasUrl = a.avatarUrl && a.avatarUrl.trim();
+    const isMain = a.id === state.activeFronterId;
+    return `
+     <div class="dash-fronter-row">
+      <div class="dash-fronter-avatar" style="${hasUrl ? `background-image:url('${esc(a.avatarUrl)}')` : `background:${esc(a.color||'#7c6fcd')}`}">
+       ${hasUrl ? '' : esc(a.emoji || (a.name||'?')[0] || '?')}
+      </div>
+      <div style="flex:1;min-width:0;">
+       <div style="font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(a.name)} ${isMain ? '<span class="tag" style="margin-left:4px;">main</span>' : ''}</div>
+       ${a.pronouns ? `<div class="text-sm" style="opacity:0.65;">${esc(a.pronouns)}</div>` : ''}
+      </div>
+     </div>
+    `;
+   }).join('');
+  }
+
+  function widgetStats(w) {
+   const alterCount = state.alters.length;
+   const boardCount = state.boards.filter(b => !b.archived).length;
+   const postCount = state.posts.length;
+   return `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:10px;height:100%;align-content:center;">
+     <div><div class="dash-stat-big">${alterCount}</div><div class="dash-stat-label">${esc(cap(t('alters')))}</div></div>
+     <div><div class="dash-stat-big">${boardCount}</div><div class="dash-stat-label">${esc(cap(t('boards')))}</div></div>
+     <div><div class="dash-stat-big">${postCount}</div><div class="dash-stat-label">Posts</div></div>
+    </div>
+   `;
+  }
+
+  function widgetRecentPosts(w) {
+   const posts = [...state.posts].sort((a,b) => b.timestamp - a.timestamp).slice(0, 8);
+   if (!posts.length) return `<div class="widget-empty-state">No posts yet.</div>`;
+   return posts.map(p => {
+    const a = getAlter(p.alterId);
+    const board = getBoard(p.boardId);
+    const preview = (p.content || '').replace(/\n/g, ' ').slice(0, 90);
+    return `
+     <div style="padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="navigate('board','${esc(p.boardId)}')">
+      <div style="display:flex;gap:6px;align-items:baseline;">
+       <span style="font-weight:700;font-size:0.82rem;">${esc(a ? a.name : 'Unknown')}</span>
+       <span class="text-sm" style="opacity:0.55;">in ${esc(board ? board.name : '?')}</span>
+      </div>
+      <div class="text-sm" style="opacity:0.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(preview)}${(p.content||'').length>90?'…':''}</div>
+     </div>
+    `;
+   }).join('');
+  }
+
+  function widgetQuickLinks(w) {
+   const boards = state.boards.filter(b => !b.archived);
+   if (!boards.length) return `<div class="widget-empty-state">No ${esc(t('boards'))} yet.</div>`;
+   return `<div class="dash-quick-link-grid">
+    ${boards.map(b => `
+     <button class="dash-quick-link" onclick="navigate('board','${esc(b.id)}')">
+      <span class="dash-quick-link-dot" style="background:${esc(b.color||'#7c6fcd')}"></span>
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;">${esc(b.name)}</span>
+     </button>
+    `).join('')}
+   </div>`;
+  }
+
+  function widgetFrontHistory(w) {
+   const entries = [...state.frontHistory].sort((a,b) => b.startTime - a.startTime).slice(0, 8);
+   if (!entries.length) return `<div class="widget-empty-state">No switches logged yet.</div>`;
+   return entries.map(e => {
+    const names = (e.alterIds || []).map(id => getAlter(id)).filter(Boolean).map(a => esc(a.name)).join(', ') || 'Unknown';
+    const start = new Date(e.startTime);
+    const timeStr = start.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    return `
+     <div style="padding:6px 0;border-bottom:1px solid var(--border);">
+      <div style="font-weight:700;font-size:0.82rem;">${names}</div>
+      <div class="text-sm" style="opacity:0.6;">${esc(timeStr)}${e.endTime ? '' : ' · ongoing'}</div>
+     </div>
+    `;
+   }).join('');
+  }
+
+  function widgetAlterRoster(w) {
+   const alters = state.alters.filter(a => !a.archived);
+   if (!alters.length) return `<div class="widget-empty-state">No ${esc(t('alters'))} yet.</div>`;
+   return alters.map(a => `
+    <div class="dash-fronter-row" style="cursor:pointer;" onclick="navigate('alters')">
+     <div class="dash-fronter-avatar" style="${a.avatarUrl ? `background-image:url('${esc(a.avatarUrl)}')` : `background:${esc(a.color||'#7c6fcd')}`}">
+      ${a.avatarUrl ? '' : esc(a.emoji || (a.name||'?')[0] || '?')}
+     </div>
+     <div style="flex:1;min-width:0;">
+      <div style="font-weight:600;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(a.name)}</div>
+      ${a.role ? `<div class="text-sm" style="opacity:0.6;">${esc(a.role)}</div>` : ''}
+     </div>
+    </div>
+   `).join('');
+  }
+
+  function widgetNote(w) {
+   const text = (w.config && w.config.text) || '';
+   return `<textarea
+    class="form-input" style="width:100%;height:100%;resize:none;border:none;background:transparent;padding:0;font-family:inherit;font-size:0.86rem;color:var(--widget-text,var(--text-0));"
+    placeholder="Write a note..."
+    oninput="updateWidgetNote('${esc(w.id)}', this.value)"
+   >${esc(text)}</textarea>`;
+  }
+
+  function widgetClock(w) {
+   const now = new Date();
+   const time = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+   const date = now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+   return `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;">
+     <div class="dash-stat-big" style="font-size:1.7rem;">${esc(time)}</div>
+     <div class="dash-stat-label">${esc(date)}</div>
+    </div>
+   `;
+  }
+
+  function updateWidgetNote(id, text) {
+   const w = getWidget(id);
+   if (!w) return;
+   w.config = w.config || {};
+   w.config.text = text;
+   saveState();
+  }
+
+  // Live-refresh the clock widget once a minute so it doesn't go stale
+  // without forcing a full dashboard re-render (which would steal focus
+  // from any note textarea currently being edited).
+  setInterval(() => {
+   if (currentView !== 'dashboard' || !state.dashboard) return;
+   state.dashboard.widgets.filter(w => w.type === 'clock').forEach(w => renderWidgetBody(w));
+  }, 30000);
+
+  /* ---------- Add / remove / configure widgets ---------- */
+
+  function openAddWidgetModal() {
+   showModal(`
+    <div class="modal-header">
+     <h2>Add Widget</h2>
+     <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:10px;">
+     ${Object.entries(WIDGET_TYPES).map(([type, meta]) => `
+      <button class="add-widget-card" onclick="addWidget('${esc(type)}')">
+       <span class="add-widget-icon">${meta.icon}</span>
+       <span>
+        <div class="add-widget-card-title">${esc(meta.label)}</div>
+        <div class="add-widget-card-desc">${esc(meta.desc)}</div>
+       </span>
+      </button>
+     `).join('')}
+    </div>
+    <div class="modal-footer">
+     <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+   `);
+  }
+
+  function findOpenSlot(w, h) {
+   // Scans downward for the first row where a w×h block doesn't overlap
+   // any existing widget, so new widgets land in open space instead of
+   // stacking on top of everything at (0,0).
+   const widgets = state.dashboard.widgets;
+   const cols = 12;
+   for (let y = 0; y < 200; y++) {
+    for (let x = 0; x <= cols - w; x++) {
+     const overlaps = widgets.some(o =>
+      x < o.x + o.w && x + w > o.x && y < o.y + o.h && y + h > o.y
+     );
+     if (!overlaps) return { x, y };
+    }
+   }
+   return { x: 0, y: 0 };
+  }
+
+  function addWidget(type) {
+   const meta = WIDGET_TYPES[type];
+   if (!meta) return;
+   const { x, y } = findOpenSlot(meta.defaultW, meta.defaultH);
+   state.dashboard.widgets.push({
+    id: uid(), type, x, y, w: meta.defaultW, h: meta.defaultH, color: null, config: {}
+   });
+   saveState();
+   closeModal();
+   renderDashboard();
+  }
+
+  function removeWidget(id) {
+   state.dashboard.widgets = state.dashboard.widgets.filter(w => w.id !== id);
+   saveState();
+   renderDashboard();
+  }
+
+  function openWidgetSettingsModal(id) {
+   const w = getWidget(id);
+   if (!w) return;
+   const meta = WIDGET_TYPES[w.type] || {};
+   showModal(`
+    <div class="modal-header">
+     <h2>${meta.icon || ''} ${esc(meta.label || 'Widget')}</h2>
+     <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:16px;">
+     <div>
+      <label class="form-label">Title</label>
+      <input class="form-input" id="widget-title-input" value="${esc((w.config && w.config.title) || '')}" placeholder="${esc(meta.label || '')}" />
+     </div>
+     <div>
+      <label class="form-label">Color</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+       ${WIDGET_COLOR_PRESETS.map(c => `
+        <button class="widget-color-swatch ${w.color === c ? 'selected' : ''}"
+         style="background:${c ? esc(c) : 'repeating-linear-gradient(45deg,var(--bg-2) 0 4px,var(--bg-3) 4px 8px)'};"
+         title="${c ? esc(c) : 'Default'}"
+         onclick="setWidgetColor('${esc(w.id)}','${c ? esc(c) : ''}')"
+        ></button>
+       `).join('')}
+      </div>
+     </div>
+    </div>
+    <div class="modal-footer">
+     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+     <button class="btn btn-primary" onclick="saveWidgetSettings('${esc(w.id)}')">Save</button>
+    </div>
+   `);
+  }
+
+  function setWidgetColor(id, color) {
+   const w = getWidget(id);
+   if (!w) return;
+   w.color = color || null;
+   document.querySelectorAll('.widget-color-swatch').forEach(el => el.classList.remove('selected'));
+   event.target.classList.add('selected');
+  }
+
+  function saveWidgetSettings(id) {
+   const w = getWidget(id);
+   if (!w) return;
+   const titleInput = document.getElementById('widget-title-input');
+   w.config = w.config || {};
+   w.config.title = titleInput ? titleInput.value.trim() : '';
+   saveState();
+   closeModal();
+   renderDashboard();
+  }
+
+  /* ---------- Drag to move, drag-handle to resize ---------- */
+
+  function attachDashboardDragHandlers() {
+   const grid = document.getElementById('dashboard-grid');
+   if (!grid) return;
+
+   grid.querySelectorAll('.widget').forEach(el => {
+    const id = el.dataset.widgetId;
+    const handle = el.querySelector('[data-drag-handle]');
+    const resizeHandle = el.querySelector('[data-resize-handle]');
+
+    handle.addEventListener('pointerdown', (e) => {
+     if (e.target.closest('.widget-action-btn')) return;
+     e.preventDefault();
+     const w = getWidget(id);
+     if (!w) return;
+     const gridRect = grid.getBoundingClientRect();
+     const colWidth = (gridRect.width - 11 * 14) / 12; // 14px gap, 12 cols
+     dashDrag = {
+      id, startClientX: e.clientX, startClientY: e.clientY,
+      origX: w.x, origY: w.y, colWidth, rowHeight: 56 + 14
+     };
+     el.classList.add('dragging');
+     document.body.style.userSelect = 'none';
+     window.addEventListener('pointermove', onDashDragMove);
+     window.addEventListener('pointerup', onDashDragEnd, { once: true });
+    });
+
+    if (resizeHandle) {
+     resizeHandle.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const w = getWidget(id);
+      if (!w) return;
+      const gridRect = grid.getBoundingClientRect();
+      const colWidth = (gridRect.width - 11 * 14) / 12;
+      dashResize = {
+       id, startClientX: e.clientX, startClientY: e.clientY,
+       origW: w.w, origH: w.h, colWidth, rowHeight: 56 + 14
+      };
+      window.addEventListener('pointermove', onDashResizeMove);
+      window.addEventListener('pointerup', onDashResizeEnd, { once: true });
+     });
+    }
+   });
+  }
+
+  function onDashDragMove(e) {
+   if (!dashDrag) return;
+   const w = getWidget(dashDrag.id);
+   if (!w) return;
+   const dCols = Math.round((e.clientX - dashDrag.startClientX) / (dashDrag.colWidth + 14));
+   const dRows = Math.round((e.clientY - dashDrag.startClientY) / dashDrag.rowHeight);
+   const newX = Math.max(0, Math.min(12 - w.w, dashDrag.origX + dCols));
+   const newY = Math.max(0, dashDrag.origY + dRows);
+   if (newX !== w.x || newY !== w.y) {
+    w.x = newX; w.y = newY;
+    const el = document.getElementById('widget-' + w.id);
+    if (el) {
+     el.style.gridColumn = `${w.x + 1} / span ${w.w}`;
+     el.style.gridRow = `${w.y + 1} / span ${w.h}`;
+    }
+   }
+  }
+
+  function onDashDragEnd() {
+   if (!dashDrag) return;
+   const el = document.getElementById('widget-' + dashDrag.id);
+   if (el) el.classList.remove('dragging');
+   document.body.style.userSelect = '';
+   window.removeEventListener('pointermove', onDashDragMove);
+   dashDrag = null;
+   saveState();
+  }
+
+  function onDashResizeMove(e) {
+   if (!dashResize) return;
+   const w = getWidget(dashResize.id);
+   if (!w) return;
+   const meta = WIDGET_TYPES[w.type] || {};
+   const dCols = Math.round((e.clientX - dashResize.startClientX) / (dashResize.colWidth + 14));
+   const dRows = Math.round((e.clientY - dashResize.startClientY) / dashResize.rowHeight);
+   const minW = meta.minW || 2, minH = meta.minH || 2;
+   const newW = Math.max(minW, Math.min(12 - w.x, dashResize.origW + dCols));
+   const newH = Math.max(minH, dashResize.origH + dRows);
+   if (newW !== w.w || newH !== w.h) {
+    w.w = newW; w.h = newH;
+    const el = document.getElementById('widget-' + w.id);
+    if (el) {
+     el.style.gridColumn = `${w.x + 1} / span ${w.w}`;
+     el.style.gridRow = `${w.y + 1} / span ${w.h}`;
+    }
+   }
+  }
+
+  function onDashResizeEnd() {
+   if (!dashResize) return;
+   window.removeEventListener('pointermove', onDashResizeMove);
+   dashResize = null;
+   saveState();
+   renderDashboard(); // re-render so widget bodies reflow at new size
+  }
 
   /* ============================================================
    RENDER ALL
@@ -6288,7 +6983,8 @@ function cancelReply() {
    applyTheme();
    renderBackupBanner();
    updateChangelogBadge();
-   if (currentView === 'alters') renderAlters();
+   if (currentView === 'dashboard') renderDashboard();
+   else if (currentView === 'alters') renderAlters();
    else if (currentView === 'board') renderBoard();
    else if (currentView === 'settings') renderSettings();
    else if (currentView === 'system') renderSystem();
@@ -6383,8 +7079,15 @@ function cancelReply() {
    if (!Array.isArray(state.activeFronterIds)) {
    state.activeFronterIds = state.activeFronterId ? [state.activeFronterId] : [];
    }
+   if (!state.dashboard || !Array.isArray(state.dashboard.widgets)) {
+   state.dashboard = defaultDashboard();
+   }
    if (state.settings.sidebarCollapsed) {
    document.body.classList.add('sidebar-rail');
+   const btn = document.getElementById('sidebar-rail-toggle');
+   if (btn) btn.title = 'Expand sidebar';
+   const label = document.getElementById('sidebar-rail-toggle-label');
+   if (label) label.textContent = 'Open sidebar';
    }
    if (!state._frontHistoryChecked) {
    state._frontHistoryChecked = true;
@@ -6407,7 +7110,7 @@ function cancelReply() {
    renderAll();
 
    console.log('6 navigate');
-   navigate('alters');
+   navigate('dashboard');
 
    console.log('7 done');
   })();
