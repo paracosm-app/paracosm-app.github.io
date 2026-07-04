@@ -21,10 +21,6 @@ Paracosm is hosted on GitHub Pages, so there's nothing to install or clone. just
 - sync to and from PluralKit with one button
 - lock boards behind a password, and only allow certain alters to see selected boards
 
-#### coming in version 1.5.0
-
-- home page / dashboard with customizable widgets
-
 #### frequently asked questions
 
 **Q: is this site open to systems of all origins?**
