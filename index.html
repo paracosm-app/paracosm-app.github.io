@@ -13,7 +13,7 @@
 
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Paracosm v1.5.0</title>
+ <title>Paracosm v1.5.0-2</title>
  <style>
   /* ============================================================
    CSS CUSTOM PROPERTIES & RESET
@@ -489,6 +489,29 @@
    padding: 14px 20px; border-top: 1px solid var(--border);
    display: flex; gap: 8px; justify-content: flex-end;
   }
+
+  /* Onboarding */
+  .onboarding-modal .modal-header { align-items: center; }
+  .onboarding-progress { display: flex; gap: 6px; justify-content: center; margin-bottom: 18px; }
+  .onboarding-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bg-3); transition: background var(--transition); }
+  .onboarding-dot.active { background: var(--accent); }
+  .onboarding-dot.done { background: var(--accent-dim); }
+  .onboarding-step-title { font-size: 1.05rem; margin-bottom: 8px; }
+  .onboarding-import-row { margin-bottom: 8px; }
+  .onboarding-term-options { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .onboarding-term-option {
+   display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+   border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer;
+   transition: border-color var(--transition), background var(--transition);
+  }
+  .onboarding-term-option:hover { border-color: var(--accent); }
+  .onboarding-term-option.selected { border-color: var(--accent); background: var(--accent-dim); }
+  .onboarding-term-option input { accent-color: var(--accent); }
+  .onboarding-walkthrough-list { display: flex; flex-direction: column; gap: 12px; }
+  .onboarding-walkthrough-item { padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); }
+  .onboarding-walkthrough-name { font-weight: 700; font-size: 0.92rem; margin-bottom: 2px; }
+  .onboarding-walkthrough-desc { font-size: 0.82rem; color: var(--text-2); }
+  .onboarding-tip-list { padding-left: 18px; font-size: 0.85rem; color: var(--text-1); display: flex; flex-direction: column; gap: 4px; }
 
   /* ============================================================
    POSTS / MESSAGE BOARD
@@ -991,20 +1014,8 @@
   }
   @media (max-width: 640px) {
    #dashboard-grid {
-    grid-template-columns: 1fr;
-    grid-auto-rows: auto;
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-   }
-   /* Override the inline desktop grid-column/grid-row placement so every
-      widget stacks full-width in document order instead of mimicking the
-      desktop layout's columns/spans/positions. */
-   #dashboard-grid .widget {
-    grid-column: 1 / -1 !important;
-    grid-row: auto !important;
-    min-height: 140px;
-   }
-   #dashboard-grid .widget .widget-body {
-    max-height: none;
    }
   }
 
@@ -1030,6 +1041,7 @@
    display: flex; align-items: center; gap: 8px;
    padding: 8px 10px 6px 6px; flex-shrink: 0;
    cursor: grab; user-select: none;
+   touch-action: none;
   }
   .widget.dragging .widget-head { cursor: grabbing; }
   .widget-drag-handle {
@@ -1404,7 +1416,7 @@
  <a class="logo" href="#" onclick="navigate('dashboard'); return false;">
  <div class="logo-dot" id="logo-dot"></div>
  Paracosm
- <span class="version-pill" id="header-version-pill">v1.5.0</span>
+ <span class="version-pill" id="header-version-pill">v1.5.0-2</span>
  </a>
 
  <div id="header-spacer"></div>
@@ -1902,7 +1914,9 @@
    compactPosts: false,
    mainChangeSplitsHistory: false,
    contentPadding: 'normal',
-   sidebarCollapsed: false
+   sidebarCollapsed: false,
+   simpleAlterCards: false,
+   hideGroupedAlters: false
    },
    alters: [],
    groups: [],
@@ -1928,6 +1942,7 @@
    lastPulledAt: null
    },
    dashboard: null,
+   onboardingComplete: false,
 
   };
  state.categories = [{ id: 'cat-general', name: 'General', order: 0, collapsed: false }];
@@ -2016,6 +2031,9 @@
   if (typeof state.alterSort !== 'string') state.alterSort = 'manual';
   if (typeof state.showArchivedAlters !== 'boolean') state.showArchivedAlters = false;
   if (!Array.isArray(state.unlockedBoards)) state.unlockedBoards = [];
+  if (state.settings.simpleAlterCards === undefined) state.settings.simpleAlterCards = false;
+  if (state.settings.hideGroupedAlters === undefined) state.settings.hideGroupedAlters = false;
+  if (state.onboardingComplete === undefined) state.onboardingComplete = false;
   (state.alters || []).forEach((a, i) => {
    if (typeof a.archived !== 'boolean') a.archived = false;
    if (typeof a.order !== 'number') a.order = i;
@@ -3062,13 +3080,21 @@
    to the top of CHANGELOG whenever new features ship.
   ============================================================ */
   const CHANGELOG = [
+    {
+    version: '1.5.0-2',
+    date: 'July 4, 2026',
+    changes: [
+     'added onboarding/tutorial modal',
+    'hide alters in groups, simpler alter card'
+    ]
+    },
    {
-   version: '1.5.0',
+   version: '1.5.0-1',
    date: 'June 30, 2026',
    changes: [
-    'added dashboard with custom widgets',
+    'added dashboard with customizable widgets',
     'collapsable sidebar on desktop',
-    'various visual changes'
+    'various visual changes',
    ]
    },
   {
@@ -3609,7 +3635,10 @@
    const container = document.getElementById('view-alters');
    const search = (state.alterSearch || '').toLowerCase().trim();
    const showArchived = !!state.showArchivedAlters;
+   const hideGroupedAlters = !!state.settings.hideGroupedAlters;
    let alters = state.alters.filter(a => a.name.toLowerCase().includes(search) && !!a.archived === showArchived);
+   const hiddenCount = hideGroupedAlters ? alters.filter(a => (a.groupIds||[]).length).length : 0;
+   if (hideGroupedAlters) alters = alters.filter(a => !(a.groupIds||[]).length);
    alters = sortAlters(alters);
    const density = state.alterDensity || 'comfy';
    const DENSITY = ALTER_DENSITY[density] || ALTER_DENSITY.comfy;
@@ -3647,6 +3676,8 @@
   </div>
   </div>
   ` : ''}
+
+  ${(hideGroupedAlters && hiddenCount) ? `<p class="text-sm text-muted mb-2">${hiddenCount} ${hiddenCount===1?t('alter'):t('alters')} hidden — in one or more groups. Toggle this off in Settings → General to show them here.</p>` : ''}
 
   ${!alters.length ? `
   <div class="empty-state">
@@ -3815,27 +3846,29 @@
   function openGroupViewModal(id) {
    const g = getGroup(id);
    if (!g) return;
-   const members = state.alters.filter(a => (a.groupIds||[]).includes(id));
+   const showArchived = false;
+   const members = state.alters.filter(a => (a.groupIds||[]).includes(id) && !a.archived);
+   const density = ALTER_DENSITY[state.alterDensity || 'comfy'];
    showModal(`
    <div class="modal-header">
    <h2 style="display:flex;align-items:center;gap:8px;"><span class="group-card-dot" style="background:${esc(g.color)}"></span>${esc(g.name)}</h2>
    <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
    </div>
    <div class="modal-body">
-   ${g.description ? `<div class="detail-row"><div class="detail-label">Description</div><div class="detail-value detail-value-pre">${esc(g.description)}</div></div>` : ''}
-   <div class="detail-row">
-   <div class="detail-label">Members</div>
-   <div class="detail-value">
-   ${members.length ? members.map(a => `<span class="tag" style="margin:2px 4px 2px 0;cursor:pointer;background:${esc(a.color)}28;color:${esc(a.color)};" onclick="openAlterViewModal('${esc(a.id)}')">${esc(a.displayName && a.displayName.trim() ? a.displayName.trim() : a.name)}</span>`).join('') : '<span class="text-muted">No alters in this group yet.</span>'}
+   ${g.description ? `<p class="text-sm text-muted mb-2">${esc(g.description)}</p>` : ''}
+   <p class="text-sm text-muted mb-2">${members.length} ${members.length===1?t('alter'):t('alters')}</p>
+   ${members.length ? `
+   <div class="card-grid density-${state.alterDensity||'comfy'}" style="grid-template-columns:repeat(auto-fill, minmax(${density.minWidth}px, 1fr));gap:${density.gap}px;">
+   ${members.map(a => renderAlterCard(a, density)).join('')}
    </div>
-   </div>
+   ` : `<div class="empty-state"><div class="empty-title">No ${t('alters')} in this group yet.</div></div>`}
    </div>
    <div class="modal-footer">
    <button class="btn btn-danger btn-sm" onclick="deleteGroup('${esc(g.id)}')">Delete</button>
    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
    <button class="btn btn-primary" onclick="openGroupModal('${esc(g.id)}')">Edit</button>
    </div>
-   `);
+   `, 'modal-lg');
   }
 
   function renderAlterCard(a, density) {
@@ -3889,6 +3922,8 @@
    `;
    })();
 
+   const simple = !!state.settings.simpleAlterCards;
+
    return `
    <div class="alter-card ${isFronting ? 'fronting' : ''}" style="--accent:${esc(a.color)};--accent-dim:${esc(a.color)}28;--accent-text:${accentText(a.color)};"
    draggable="${draggable}"
@@ -3909,13 +3944,13 @@
    ${density.showPronouns && state.settings.showPronouns && a.pronouns ? `<div class="alter-pronouns">${esc(a.pronouns)}</div>` : ''}
    </div>
    </div>
-   ${density.showRole && state.settings.showRole && a.role ? `<div class="alter-role" style="color:${esc(a.color)}">${esc(a.role)}</div>` : ''}
-   ${density.showProxy && (a.proxyTags && a.proxyTags.length) ? `<div class="alter-proxy-tags">${renderProxyTagChips(a.proxyTags)}</div>` : ''}
-   ${density.showNotes && a.notes ? `<div class="text-sm text-muted mt-1" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(a.notes)}</div>` : ''}
+   ${!simple && density.showRole && state.settings.showRole && a.role ? `<div class="alter-role" style="color:${esc(a.color)}">${esc(a.role)}</div>` : ''}
+   ${!simple && density.showProxy && (a.proxyTags && a.proxyTags.length) ? `<div class="alter-proxy-tags">${renderProxyTagChips(a.proxyTags)}</div>` : ''}
+   ${!simple && density.showNotes && a.notes ? `<div class="text-sm text-muted mt-1" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(a.notes)}</div>` : ''}
    ${actionsHTML ? `
    <div class="post-actions mt-2">
    ${actionsHTML}
-   ${density.showPostCount ? `<span class="badge">${postCount} ${t('posts')}</span>` : ''}
+   ${!simple && density.showPostCount ? `<span class="badge">${postCount} ${t('posts')}</span>` : ''}
    </div>
    ` : ''}   </div>
    `;
@@ -3936,6 +3971,7 @@
    const postCount = state.posts.filter(p => p.alterId === a.id).length;
    const hasDisplayName = a.displayName && a.displayName.trim() && a.displayName.trim() !== a.name;
    const displayTitle = hasDisplayName ? a.displayName.trim() : a.name;
+   const simple = !!state.settings.simpleAlterCards;
 
    showModal(`
    <div class="profile-modal-banner" style="${alterBannerStyle(a)}">
@@ -3954,18 +3990,19 @@
    <div class="modal-body" style="padding-top:0;">
    <div class="profile-pills">
    ${a.pronouns ? `<span class="profile-pill">${esc(a.pronouns)}</span>` : ''}
-   ${a.role ? `<span class="profile-pill" style="background:${esc(a.color)}1f;color:${esc(a.color)};">🎭 ${esc(a.role)}</span>` : ''}
-   ${a.birthday ? `<span class="profile-pill">🎂 ${esc(formatBirthday(a.birthday))}</span>` : ''}
+   ${!simple && a.role ? `<span class="profile-pill" style="background:${esc(a.color)}1f;color:${esc(a.color)};">🎭 ${esc(a.role)}</span>` : ''}
+   ${!simple && a.birthday ? `<span class="profile-pill">🎂 ${esc(formatBirthday(a.birthday))}</span>` : ''}
    <span class="profile-pill"><span class="profile-pill-swatch" style="background:${esc(a.color)}"></span>${esc((a.color||'').toUpperCase())}</span>
    </div>
 
-   ${(a.unreadBoardIds && a.unreadBoardIds.length) ? `
+   ${(!simple && a.unreadBoardIds && a.unreadBoardIds.length) ? `
    <div class="profile-section">
    <div class="profile-section-label">Unread</div>
    ${a.unreadBoardIds.map(bid => { const b = getBoard(bid); return b ? `<span class="tag" style="margin:2px 4px 2px 0;cursor:pointer;" onclick="closeModal();navigate('board','${esc(bid)}')">${esc(b.name)}</span>` : ''; }).join('')}
    </div>
    ` : ''}
 
+   ${!simple ? `
    <div class="profile-section">
    <div class="profile-section-label">Proxy Tags</div>
    ${(a.proxyTags && a.proxyTags.length) ? `
@@ -3973,14 +4010,15 @@
    <div class="form-hint mt-1">${a.keepProxy ? 'Keeps' : 'Strips'} the proxy tags in the proxied message.</div>
    ` : `<span class="text-muted text-sm">None set</span>`}
    </div>
+   ` : ''}
 
-   ${a.notes ? `
+   ${(!simple && a.notes) ? `
    <div class="profile-section">
    <div class="profile-section-label">Description</div>
    <div class="profile-section-body">${esc(a.notes)}</div>
    </div>` : ''}
 
-   ${(state.systemFields && state.systemFields.length) ? `
+   ${(!simple && state.systemFields && state.systemFields.length) ? `
    <div class="profile-section">
    <div class="profile-section-label">Custom Fields</div>
    <div class="profile-field-grid">
@@ -3992,7 +4030,7 @@
    </div>
    </div>` : ''}
 
-   ${(a.groupIds && a.groupIds.length) ? `
+   ${(!simple && a.groupIds && a.groupIds.length) ? `
    <div class="profile-section">
    <div class="profile-section-label">Groups</div>
    <div class="alter-group-tags">
@@ -4002,7 +4040,7 @@
    ` : ''}
 
    <div class="profile-section">
-   <div class="profile-footnote">${postCount} ${t('posts')} · created ${fmt(a.createdAt)}${a.pkId ? ` · linked to PluralKit member <code>${esc(a.pkId)}</code>` : ''}</div>
+   <div class="profile-footnote">${simple ? '' : `${postCount} ${t('posts')} · `}created ${fmt(a.createdAt)}${(!simple && a.pkId) ? ` · linked to PluralKit member <code>${esc(a.pkId)}</code>` : ''}</div>
    </div>
    </div>
    <div class="modal-footer" style="justify-content:space-between;flex-wrap:wrap;">
@@ -4642,6 +4680,18 @@ function cancelReply() {
    <div class="setting-row">
    <div><div class="setting-label">Changing Main Affects History</div><div class="setting-desc">When ON, switching who ${t('posts')} are signed as (while the same group keeps ${t('fronting')}) starts a new front-history entry. When OFF, it just relabels the current one.</div></div>
    <label class="toggle"><input type="checkbox" ${s.mainChangeSplitsHistory?'checked':''} onchange="changeSetting('mainChangeSplitsHistory',this.checked)"><span class="toggle-slider"></span></label>
+   </div>
+   </div>
+
+   <div class="settings-section">
+   <h2>${cap(t('alter'))} Cards</h2>
+   <div class="setting-row">
+   <div><div class="setting-label">Simple ${cap(t('alter'))} Cards</div><div class="setting-desc">Store and show only name, icon, banner, and ${t('pronouns')} for each ${t('alter')}. Useful if you'd rather not keep extra information on record. Existing data for hidden fields is kept, just not shown.</div></div>
+   <label class="toggle"><input type="checkbox" ${s.simpleAlterCards?'checked':''} onchange="changeSetting('simpleAlterCards',this.checked);renderAll()"><span class="toggle-slider"></span></label>
+   </div>
+   <div class="setting-row">
+   <div><div class="setting-label">Hide ${cap(t('alters'))} in Groups</div><div class="setting-desc">Hide ${t('alters')} from the main ${t('alters')} view if they belong to one or more groups, to help keep large rosters organised. View them by opening the group instead.</div></div>
+   <label class="toggle"><input type="checkbox" ${s.hideGroupedAlters?'checked':''} onchange="changeSetting('hideGroupedAlters',this.checked);renderAll()"><span class="toggle-slider"></span></label>
    </div>
    </div>
    </div>
@@ -5401,6 +5451,7 @@ function cancelReply() {
    const isEdit = !!alter;
    const a = alter || { id: uid(), name: '', displayName: '', pronouns: '', role: '', color: PRESET_COLORS[Math.floor(Math.random()*PRESET_COLORS.length)], emoji: '', avatarUrl: '', banner: '', birthday: '', proxyTags: [], keepProxy: false, notes: '', fieldValues: {}, groupIds: [] };
    alterModalProxyTagsDraft = JSON.parse(JSON.stringify(a.proxyTags || []));
+   const simple = !!state.settings.simpleAlterCards;
 
    showModal(`
    <div class="modal-header">
@@ -5408,6 +5459,7 @@ function cancelReply() {
    <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
    </div>
    <div class="modal-body">
+   ${simple ? `<p class="text-sm text-muted mb-2">Simple cards are on — only name, icon, banner, and ${t('pronouns')} are shown. Turn this off in Settings → General to use every field.</p>` : ''}
    <div class="form-row">
    <div class="form-group">
    <label class="form-label">Name *</label>
@@ -5419,21 +5471,25 @@ function cancelReply() {
    </div>
    </div>
 
+   ${!simple ? `
    <div class="form-group">
    <label class="form-label">Display Name <span class="badge" style="font-size:0.7rem;vertical-align:middle;">Paracosm only</span></label>
    <input class="form-input" id="a-displayname" value="${esc(a.displayName||'')}" placeholder="Shown instead of the name above, if set" />
    <div class="form-hint">Optional — shown on alter cards and posts in Paracosm instead of the name above. Leave blank to just use the name. If the PluralKit "append pronouns" setting is on, the PK display name is built separately and never affects what you see here.</div>
    </div>
+   ` : `<input type="hidden" id="a-displayname" value="${esc(a.displayName||'')}" />`}
 
    <div class="form-row">
    <div class="form-group">
    <label class="form-label">${cap(t('pronouns'))}</label>
    <input class="form-input" id="a-pronouns" value="${esc(a.pronouns)}" placeholder="they/them" />
    </div>
+   ${!simple ? `
    <div class="form-group">
    <label class="form-label">${cap(t('role'))}</label>
    <input class="form-input" id="a-role" value="${esc(a.role)}" placeholder="e.g. host, protector…" />
    </div>
+   ` : `<input type="hidden" id="a-role" value="${esc(a.role)}" />`}
    </div>
 
    <div class="form-group">
@@ -5477,6 +5533,7 @@ function cancelReply() {
    <div class="form-hint">Optional — shown at the top of this ${t('alter')}'s detail view.</div>
    </div>
 
+   ${!simple ? `
    <div class="form-group">
    <label class="form-label">Birthday</label>
    <input class="form-input" id="a-birthday" value="${esc(birthdayToInputValue(a.birthday))}" placeholder="YYYY-MM-DD or MM-DD" />
@@ -5528,6 +5585,11 @@ function cancelReply() {
    <div class="form-hint">Manage which fields exist on the ${t('system')} page — fill in this ${t('alter')}'s own value for each one here.</div>
    </div>
    ` : ''}
+   ` : `
+   <input type="hidden" id="a-birthday" value="${esc(birthdayToInputValue(a.birthday))}" />
+   <input type="checkbox" id="a-keepproxy" ${a.keepProxy ? 'checked' : ''} class="hidden" />
+   <input type="hidden" id="a-notes" value="${esc(a.notes||'')}" />
+   `}
    </div>
    <div class="modal-footer">
    ${isEdit ? `<button class="btn btn-danger btn-sm" onclick="deleteAlter('${esc(a.id)}')">Delete</button>` : ''}
@@ -6504,19 +6566,53 @@ function cancelReply() {
   function defaultDashboard() {
    return {
    widgets: [
-    { id: uid(), type: 'welcome',     x: 0, y: 0,  w: 12, h: 2, color: null, config: {} },
-    { id: uid(), type: 'fronting',    x: 0, y: 2,  w: 4,  h: 3, color: null, config: {} },
-    { id: uid(), type: 'stats',       x: 4, y: 2,  w: 4,  h: 3, color: null, config: {} },
-    { id: uid(), type: 'quickLinks',  x: 8, y: 2,  w: 4,  h: 3, color: null, config: {} },
-    { id: uid(), type: 'recentPosts', x: 0, y: 5,  w: 7,  h: 5, color: null, config: {} },
-    { id: uid(), type: 'frontHistory',x: 7, y: 5,  w: 5,  h: 5, color: null, config: {} },
+    { id: uid(), type: 'welcome',     x: 0, y: 0,  w: 12, h: 2, mx: 0, my: 0,  mw: 2, mh: 2, color: null, config: {} },
+    { id: uid(), type: 'fronting',    x: 0, y: 2,  w: 4,  h: 3, mx: 0, my: 2,  mw: 2, mh: 3, color: null, config: {} },
+    { id: uid(), type: 'stats',       x: 4, y: 2,  w: 4,  h: 3, mx: 0, my: 5,  mw: 1, mh: 3, color: null, config: {} },
+    { id: uid(), type: 'quickLinks',  x: 8, y: 2,  w: 4,  h: 3, mx: 1, my: 5,  mw: 1, mh: 3, color: null, config: {} },
+    { id: uid(), type: 'recentPosts', x: 0, y: 5,  w: 7,  h: 5, mx: 0, my: 8,  mw: 2, mh: 5, color: null, config: {} },
+    { id: uid(), type: 'frontHistory',x: 7, y: 5,  w: 5,  h: 5, mx: 0, my: 13, mw: 2, mh: 5, color: null, config: {} },
    ],
    nextZ: 1
    };
   }
 
-  let dashDrag = null;   // { widgetId, startX, startY, origX, origY, pxPerCol, pxPerRow }
-  let dashResize = null; // { widgetId, startX, startY, origW, origH, pxPerCol, pxPerRow }
+  let dashDrag = null;   // { widgetId, startX, startY, origX, origY, pxPerCol, pxPerRow, mobile, cols }
+  let dashResize = null; // { widgetId, startX, startY, origW, origH, pxPerCol, pxPerRow, mobile, cols }
+
+  const MOBILE_BREAKPOINT = '(max-width: 640px)';
+  function isMobileLayout() { return window.matchMedia(MOBILE_BREAKPOINT).matches; }
+  function layoutCols(mobile) { return mobile ? 2 : 12; }
+
+  // Reads/writes the position+size fields for whichever layout (desktop
+  // 12-col grid, or mobile 2-col grid) is currently active, so the two
+  // layouts can be dragged/resized completely independently.
+  function widgetPos(w, mobile) {
+   return mobile
+    ? { x: w.mx, y: w.my, w: w.mw, h: w.mh }
+    : { x: w.x, y: w.y, w: w.w, h: w.h };
+  }
+  function setWidgetPos(w, mobile, pos) {
+   if (mobile) { w.mx = pos.x; w.my = pos.y; w.mw = pos.w; w.mh = pos.h; }
+   else { w.x = pos.x; w.y = pos.y; w.w = pos.w; w.h = pos.h; }
+  }
+
+  // Older saved dashboards (or widgets added before mobile layout existed)
+  // may not have mx/my/mw/mh yet — backfill them once, packing widgets
+  // into the 2-col grid in their existing order so nothing overlaps.
+  function ensureMobileLayouts() {
+   const widgets = state.dashboard.widgets;
+   let changed = false;
+   widgets.forEach(w => {
+    if (w.mx === undefined || w.my === undefined || w.mw === undefined || w.mh === undefined) {
+     const mw = Math.min(2, Math.max(1, w.w >= 8 ? 2 : 1));
+     const { x, y } = findOpenSlot(mw, w.h, 2, true);
+     w.mx = x; w.my = y; w.mw = mw; w.mh = w.h;
+     changed = true;
+    }
+   });
+   if (changed) saveState();
+  }
 
   function getWidget(id) { return state.dashboard.widgets.find(w => w.id === id); }
 
@@ -6527,12 +6623,28 @@ function cancelReply() {
    return `--widget-bg:rgba(${rgb},0.13);--widget-border:${esc(w.color)};--widget-text:var(--text-0);`;
   }
 
+  let _dashLastMobile = null;
+  function attachDashboardResizeWatcher() {
+   if (attachDashboardResizeWatcher._attached) return;
+   attachDashboardResizeWatcher._attached = true;
+   const mq = window.matchMedia(MOBILE_BREAKPOINT);
+   const handler = () => {
+    if (currentView === 'dashboard' && mq.matches !== _dashLastMobile) renderDashboard();
+   };
+   if (mq.addEventListener) mq.addEventListener('change', handler);
+   else mq.addListener(handler); // Safari fallback
+  }
+
   function renderDashboard() {
    const container = document.getElementById('view-dashboard');
    if (!container) return;
    if (!state.dashboard || !Array.isArray(state.dashboard.widgets)) state.dashboard = defaultDashboard();
 
    const widgets = state.dashboard.widgets;
+   ensureMobileLayouts();
+   const mobile = isMobileLayout();
+   _dashLastMobile = mobile;
+   attachDashboardResizeWatcher();
 
    container.innerHTML = `
     <div class="page-header">
@@ -6552,16 +6664,17 @@ function cancelReply() {
    if (!widgets.length) return;
 
    const grid = document.getElementById('dashboard-grid');
-   grid.innerHTML = widgets.map(w => renderWidgetShell(w)).join('');
+   grid.innerHTML = widgets.map(w => renderWidgetShell(w, mobile)).join('');
    widgets.forEach(w => renderWidgetBody(w));
-   attachDashboardDragHandlers();
+   attachDashboardDragHandlers(mobile);
   }
 
-  function renderWidgetShell(w) {
+  function renderWidgetShell(w, mobile) {
    const meta = WIDGET_TYPES[w.type] || { label: 'Widget', icon: '❔' };
+   const p = widgetPos(w, mobile);
    return `
     <div class="widget" id="widget-${esc(w.id)}"
-     style="grid-column:${w.x + 1} / span ${w.w};grid-row:${w.y + 1} / span ${w.h};${widgetColorVars(w)}"
+     style="grid-column:${p.x + 1} / span ${p.w};grid-row:${p.y + 1} / span ${p.h};${widgetColorVars(w)}"
      data-widget-id="${esc(w.id)}"
     >
      <div class="widget-head" data-drag-handle>
@@ -6783,17 +6896,20 @@ function cancelReply() {
    `);
   }
 
-  function findOpenSlot(w, h) {
+  function findOpenSlot(w, h, cols, mobile) {
    // Scans downward for the first row where a w×h block doesn't overlap
-   // any existing widget, so new widgets land in open space instead of
-   // stacking on top of everything at (0,0).
+   // any existing widget (checked in the given layout's coordinate space),
+   // so new/resized/moved widgets land in open space instead of
+   // stacking on top of everything.
+   cols = cols || 12;
    const widgets = state.dashboard.widgets;
-   const cols = 12;
-   for (let y = 0; y < 200; y++) {
+   for (let y = 0; y < 400; y++) {
     for (let x = 0; x <= cols - w; x++) {
-     const overlaps = widgets.some(o =>
-      x < o.x + o.w && x + w > o.x && y < o.y + o.h && y + h > o.y
-     );
+     const overlaps = widgets.some(o => {
+      const p = widgetPos(o, mobile);
+      if (p.x === undefined || p.y === undefined) return false;
+      return x < p.x + p.w && x + w > p.x && y < p.y + p.h && y + h > p.y;
+     });
      if (!overlaps) return { x, y };
     }
    }
@@ -6803,9 +6919,14 @@ function cancelReply() {
   function addWidget(type) {
    const meta = WIDGET_TYPES[type];
    if (!meta) return;
-   const { x, y } = findOpenSlot(meta.defaultW, meta.defaultH);
+   const desktopSlot = findOpenSlot(meta.defaultW, meta.defaultH, 12, false);
+   const mobileW = Math.min(2, Math.max(1, meta.defaultW >= 8 ? 2 : 1));
+   const mobileSlot = findOpenSlot(mobileW, meta.defaultH, 2, true);
    state.dashboard.widgets.push({
-    id: uid(), type, x, y, w: meta.defaultW, h: meta.defaultH, color: null, config: {}
+    id: uid(), type,
+    x: desktopSlot.x, y: desktopSlot.y, w: meta.defaultW, h: meta.defaultH,
+    mx: mobileSlot.x, my: mobileSlot.y, mw: mobileW, mh: meta.defaultH,
+    color: null, config: {}
    });
    saveState();
    closeModal();
@@ -6873,9 +6994,23 @@ function cancelReply() {
 
   /* ---------- Drag to move, drag-handle to resize ---------- */
 
-  function attachDashboardDragHandlers() {
+  // True if a w×h block at (x,y) would overlap any widget other than
+  // `ignoreId`, checked in the given layout's coordinate space. Used to
+  // stop drag/resize from ever landing widgets on top of one another.
+  function slotCollides(x, y, w, h, cols, mobile, ignoreId) {
+   if (x < 0 || y < 0 || x + w > cols) return true;
+   return state.dashboard.widgets.some(o => {
+    if (o.id === ignoreId) return false;
+    const p = widgetPos(o, mobile);
+    if (p.x === undefined || p.y === undefined) return false;
+    return x < p.x + p.w && x + w > p.x && y < p.y + p.h && y + h > p.y;
+   });
+  }
+
+  function attachDashboardDragHandlers(mobile) {
    const grid = document.getElementById('dashboard-grid');
    if (!grid) return;
+   const cols = layoutCols(mobile);
 
    grid.querySelectorAll('.widget').forEach(el => {
     const id = el.dataset.widgetId;
@@ -6887,16 +7022,21 @@ function cancelReply() {
      e.preventDefault();
      const w = getWidget(id);
      if (!w) return;
+     const pos = widgetPos(w, mobile);
      const gridRect = grid.getBoundingClientRect();
-     const colWidth = (gridRect.width - 11 * 14) / 12; // 14px gap, 12 cols
+     const colWidth = (gridRect.width - (cols - 1) * 14) / cols; // 14px gap
      dashDrag = {
-      id, startClientX: e.clientX, startClientY: e.clientY,
-      origX: w.x, origY: w.y, colWidth, rowHeight: 56 + 14
+      id, mobile, cols, startClientX: e.clientX, startClientY: e.clientY,
+      origX: pos.x, origY: pos.y, w: pos.w, h: pos.h,
+      lastValidX: pos.x, lastValidY: pos.y,
+      colWidth, rowHeight: 56 + 14
      };
      el.classList.add('dragging');
      document.body.style.userSelect = 'none';
+     handle.setPointerCapture && handle.setPointerCapture(e.pointerId);
      window.addEventListener('pointermove', onDashDragMove);
      window.addEventListener('pointerup', onDashDragEnd, { once: true });
+     window.addEventListener('pointercancel', onDashDragEnd, { once: true });
     });
 
     if (resizeHandle) {
@@ -6905,14 +7045,19 @@ function cancelReply() {
       e.stopPropagation();
       const w = getWidget(id);
       if (!w) return;
+      const pos = widgetPos(w, mobile);
       const gridRect = grid.getBoundingClientRect();
-      const colWidth = (gridRect.width - 11 * 14) / 12;
+      const colWidth = (gridRect.width - (cols - 1) * 14) / cols;
       dashResize = {
-       id, startClientX: e.clientX, startClientY: e.clientY,
-       origW: w.w, origH: w.h, colWidth, rowHeight: 56 + 14
+       id, mobile, cols, startClientX: e.clientX, startClientY: e.clientY,
+       origW: pos.w, origH: pos.h, x: pos.x, y: pos.y,
+       lastValidW: pos.w, lastValidH: pos.h,
+       colWidth, rowHeight: 56 + 14
       };
+      resizeHandle.setPointerCapture && resizeHandle.setPointerCapture(e.pointerId);
       window.addEventListener('pointermove', onDashResizeMove);
       window.addEventListener('pointerup', onDashResizeEnd, { once: true });
+      window.addEventListener('pointercancel', onDashResizeEnd, { once: true });
      });
     }
    });
@@ -6922,16 +7067,22 @@ function cancelReply() {
    if (!dashDrag) return;
    const w = getWidget(dashDrag.id);
    if (!w) return;
+   const { mobile, cols } = dashDrag;
    const dCols = Math.round((e.clientX - dashDrag.startClientX) / (dashDrag.colWidth + 14));
    const dRows = Math.round((e.clientY - dashDrag.startClientY) / dashDrag.rowHeight);
-   const newX = Math.max(0, Math.min(12 - w.w, dashDrag.origX + dCols));
+   const newX = Math.max(0, Math.min(cols - dashDrag.w, dashDrag.origX + dCols));
    const newY = Math.max(0, dashDrag.origY + dRows);
-   if (newX !== w.x || newY !== w.y) {
-    w.x = newX; w.y = newY;
+   // Only commit the move if it doesn't land on top of another widget —
+   // otherwise widgets could overlap, which isn't allowed.
+   if ((newX !== dashDrag.lastValidX || newY !== dashDrag.lastValidY) &&
+       !slotCollides(newX, newY, dashDrag.w, dashDrag.h, cols, mobile, w.id)) {
+    dashDrag.lastValidX = newX;
+    dashDrag.lastValidY = newY;
+    setWidgetPos(w, mobile, { x: newX, y: newY, w: dashDrag.w, h: dashDrag.h });
     const el = document.getElementById('widget-' + w.id);
     if (el) {
-     el.style.gridColumn = `${w.x + 1} / span ${w.w}`;
-     el.style.gridRow = `${w.y + 1} / span ${w.h}`;
+     el.style.gridColumn = `${newX + 1} / span ${dashDrag.w}`;
+     el.style.gridRow = `${newY + 1} / span ${dashDrag.h}`;
     }
    }
   }
@@ -6942,6 +7093,7 @@ function cancelReply() {
    if (el) el.classList.remove('dragging');
    document.body.style.userSelect = '';
    window.removeEventListener('pointermove', onDashDragMove);
+   window.removeEventListener('pointercancel', onDashDragEnd);
    dashDrag = null;
    saveState();
   }
@@ -6950,18 +7102,24 @@ function cancelReply() {
    if (!dashResize) return;
    const w = getWidget(dashResize.id);
    if (!w) return;
+   const { mobile, cols } = dashResize;
    const meta = WIDGET_TYPES[w.type] || {};
    const dCols = Math.round((e.clientX - dashResize.startClientX) / (dashResize.colWidth + 14));
    const dRows = Math.round((e.clientY - dashResize.startClientY) / dashResize.rowHeight);
-   const minW = meta.minW || 2, minH = meta.minH || 2;
-   const newW = Math.max(minW, Math.min(12 - w.x, dashResize.origW + dCols));
+   const minW = Math.min(mobile ? cols : (meta.minW || 2), cols), minH = meta.minH || 2;
+   const newW = Math.max(minW, Math.min(cols - dashResize.x, dashResize.origW + dCols));
    const newH = Math.max(minH, dashResize.origH + dRows);
-   if (newW !== w.w || newH !== w.h) {
-    w.w = newW; w.h = newH;
+   // Only commit the resize if the larger footprint doesn't overlap
+   // another widget — otherwise widgets could grow on top of each other.
+   if ((newW !== dashResize.lastValidW || newH !== dashResize.lastValidH) &&
+       !slotCollides(dashResize.x, dashResize.y, newW, newH, cols, mobile, w.id)) {
+    dashResize.lastValidW = newW;
+    dashResize.lastValidH = newH;
+    setWidgetPos(w, mobile, { x: dashResize.x, y: dashResize.y, w: newW, h: newH });
     const el = document.getElementById('widget-' + w.id);
     if (el) {
-     el.style.gridColumn = `${w.x + 1} / span ${w.w}`;
-     el.style.gridRow = `${w.y + 1} / span ${w.h}`;
+     el.style.gridColumn = `${dashResize.x + 1} / span ${newW}`;
+     el.style.gridRow = `${dashResize.y + 1} / span ${newH}`;
     }
    }
   }
@@ -6969,6 +7127,7 @@ function cancelReply() {
   function onDashResizeEnd() {
    if (!dashResize) return;
    window.removeEventListener('pointermove', onDashResizeMove);
+   window.removeEventListener('pointercancel', onDashResizeEnd);
    dashResize = null;
    saveState();
    renderDashboard(); // re-render so widget bodies reflow at new size
@@ -7048,6 +7207,197 @@ function cancelReply() {
   }
 
   /* ============================================================
+   ONBOARDING / FIRST-RUN TUTORIAL
+  ============================================================ */
+  const ONBOARDING_STEPS = ['import', 'terminology', 'accessibility', 'walkthrough', 'finish'];
+  let onboardingStep = 0;
+  let onboardingTermPreset = 'alters';
+
+  const ONBOARDING_TERM_PRESETS = {
+   alters:    { label: 'Alters',     terms: { alter: 'alter', alters: 'alters' } },
+   parts:     { label: 'Parts',      terms: { alter: 'part', alters: 'parts' } },
+   members:   { label: 'Members',    terms: { alter: 'member', alters: 'members' } },
+   headmates: { label: 'Headmates',  terms: { alter: 'headmate', alters: 'headmates' } },
+   custom:    { label: 'Keep current / set later', terms: null }
+  };
+
+  function startOnboardingIfNeeded() {
+   if (state.onboardingComplete) return;
+   onboardingStep = 0;
+   renderOnboardingModal();
+  }
+
+  function onboardingStepIndex() { return ONBOARDING_STEPS.indexOf(ONBOARDING_STEPS[onboardingStep]) }
+
+  function renderOnboardingProgress() {
+   return `
+   <div class="onboarding-progress">
+   ${ONBOARDING_STEPS.map((s, i) => `<span class="onboarding-dot ${i===onboardingStep?'active':''} ${i<onboardingStep?'done':''}"></span>`).join('')}
+   </div>
+   `;
+  }
+
+  function renderOnboardingModal() {
+   const step = ONBOARDING_STEPS[onboardingStep];
+   const body = onboardingStepBody(step);
+   const container = document.getElementById('modal-container');
+   container.innerHTML = `
+   <div class="modal-backdrop">
+   <div class="modal modal-lg onboarding-modal">
+   <div class="modal-header">
+   <h2>Welcome to Paracosm</h2>
+   ${step !== 'finish' ? `<button class="btn btn-ghost btn-sm" onclick="skipOnboarding()">Skip setup</button>` : ''}
+   </div>
+   <div class="modal-body">
+   ${renderOnboardingProgress()}
+   ${body}
+   </div>
+   <div class="modal-footer">
+   ${onboardingStep > 0 ? `<button class="btn btn-secondary" onclick="onboardingBack()">Back</button>` : '<span></span>'}
+   <div style="flex:1"></div>
+   ${step !== 'finish' ? `<button class="btn btn-primary" onclick="onboardingNext()">Continue</button>` : `<button class="btn btn-primary" onclick="finishOnboarding()">Get started</button>`}
+   </div>
+   </div>
+   </div>
+   `;
+  }
+
+  function onboardingStepBody(step) {
+   if (step === 'import') {
+   return `
+   <h3 class="onboarding-step-title">Bring in your existing data</h3>
+   <p class="text-sm text-muted mb-2">If you're switching from another system tracker, import your data now. You can always do this later from Settings → Data.</p>
+   <div class="onboarding-import-row">
+   <button class="btn btn-secondary" onclick="document.getElementById('ob-import-input').click()">Import a Paracosm backup (.json)</button>
+   <input type="file" id="ob-import-input" accept=".json" class="hidden" onchange="importData(event)" />
+   </div>
+   <div class="onboarding-import-row">
+   <button class="btn btn-secondary" onclick="document.getElementById('ob-sp-import-input').click()">Import from Simply Plural</button>
+   <input type="file" id="ob-sp-import-input" accept=".json" class="hidden" onchange="openSpImportModal(event)" />
+   </div>
+   <div class="onboarding-import-row">
+   <button class="btn btn-secondary" onclick="document.getElementById('ob-ps-import-input').click()">Import from Pluralspace</button>
+   <input type="file" id="ob-ps-import-input" accept=".json" class="hidden" onchange="openPsImportModal(event)" />
+   </div>
+   <p class="form-hint mt-2">Nothing to import? No problem — skip ahead and start fresh.</p>
+   `;
+   }
+   if (step === 'terminology') {
+   return `
+   <h3 class="onboarding-step-title">Choose your terminology</h3>
+   <p class="text-sm text-muted mb-2">Paracosm calls system members "alters" by default. Pick the language that fits your system, or keep it as is — this can be changed any time in Settings.</p>
+   <div class="onboarding-term-options">
+   ${Object.keys(ONBOARDING_TERM_PRESETS).map(key => {
+    const preset = ONBOARDING_TERM_PRESETS[key];
+    return `
+    <label class="onboarding-term-option ${onboardingTermPreset===key?'selected':''}">
+    <input type="radio" name="ob-term" value="${key}" ${onboardingTermPreset===key?'checked':''} onchange="onboardingTermPreset='${key}'" />
+    <span>${esc(preset.label)}</span>
+    </label>
+    `;
+   }).join('')}
+   </div>
+   `;
+   }
+   if (step === 'accessibility') {
+   const s = state.settings;
+   return `
+   <h3 class="onboarding-step-title">Quick accessibility options</h3>
+   <p class="text-sm text-muted mb-2">Set up your preferred reading experience. Everything here is also in Settings → Accessibility if you want more control later.</p>
+   <div class="setting-row">
+   <div><div class="setting-label">Dark Mode</div><div class="setting-desc">Switch to a darker interface</div></div>
+   <label class="toggle"><input type="checkbox" ${s.darkMode?'checked':''} onchange="changeSetting('darkMode',this.checked);applyTheme()"><span class="toggle-slider"></span></label>
+   </div>
+   <div class="setting-row">
+   <div><div class="setting-label">Reduce Motion</div><div class="setting-desc">Disables transitions and animations</div></div>
+   <label class="toggle"><input type="checkbox" ${s.reducedMotion?'checked':''} onchange="changeSetting('reducedMotion',this.checked);applyTheme()"><span class="toggle-slider"></span></label>
+   </div>
+   <div class="setting-row">
+   <div><div class="setting-label">High Contrast</div><div class="setting-desc">Stronger borders for easier visibility</div></div>
+   <label class="toggle"><input type="checkbox" ${s.highContrast?'checked':''} onchange="changeSetting('highContrast',this.checked);applyTheme()"><span class="toggle-slider"></span></label>
+   </div>
+   <div class="form-group mt-2">
+   <div class="form-label">Text Size</div>
+   <div>${SIZE_OPTIONS.map(f => `<span class="size-swatch ${s.fontSize===f.id?'selected':''}" style="font-size:${f.px}" onclick="changeSetting('fontSize','${f.id}');applyTheme();renderOnboardingModal()">${f.label}</span>`).join('')}</div>
+   </div>
+   <div class="setting-row">
+   <div><div class="setting-label">Simple ${cap(t('alter'))} Cards</div><div class="setting-desc">Only store name, icon, banner, and pronouns for each ${t('alter')}</div></div>
+   <label class="toggle"><input type="checkbox" ${s.simpleAlterCards?'checked':''} onchange="changeSetting('simpleAlterCards',this.checked)"><span class="toggle-slider"></span></label>
+   </div>
+   `;
+   }
+   if (step === 'walkthrough') {
+   const pages = [
+    { name: 'Dashboard', desc: 'A customisable overview — widgets for who\'s fronting, recent posts, stats, and more.' },
+    { name: cap(t('alters')), desc: `Your roster. Add ${t('alters')}, organise them into groups, and switch who's ${t('fronting')}.` },
+    { name: cap(t('boards')), desc: `Message ${t('boards')} for posting as whoever's ${t('fronting')} — journals, shared notes, anything you like.` },
+    { name: 'Front History', desc: `A log of who has been ${t('fronting')} and when.` },
+    { name: 'Settings', desc: 'Appearance, accessibility, terminology, PluralKit sync, and data export all live here.' }
+   ];
+   return `
+   <h3 class="onboarding-step-title">A quick tour</h3>
+   <div class="onboarding-walkthrough-list">
+   ${pages.map(p => `
+   <div class="onboarding-walkthrough-item">
+   <div class="onboarding-walkthrough-name">${esc(p.name)}</div>
+   <div class="onboarding-walkthrough-desc">${esc(p.desc)}</div>
+   </div>
+   `).join('')}
+   </div>
+   `;
+   }
+   if (step === 'finish') {
+   return `
+   <h3 class="onboarding-step-title">You're all set</h3>
+   <p class="text-sm text-muted mb-2">Your preferences are saved. You can revisit terminology, accessibility, and import options anytime in Settings.</p>
+   <p class="text-sm text-muted">A few things worth knowing:</p>
+   <ul class="onboarding-tip-list">
+   <li>Click any ${t('alter')} card to see its full profile.</li>
+   <li>Export your data regularly from Settings → Data as a backup.</li>
+   <li>Group ${t('alters')} together for easier organisation on the ${t('alters')} page.</li>
+   </ul>
+   `;
+   }
+   return '';
+  }
+
+  function onboardingNext() {
+   if (onboardingStep === ONBOARDING_STEPS.indexOf('terminology')) {
+   applyOnboardingTerminology();
+   }
+   if (onboardingStep < ONBOARDING_STEPS.length - 1) {
+   onboardingStep++;
+   renderOnboardingModal();
+   }
+  }
+
+  function onboardingBack() {
+   if (onboardingStep > 0) {
+   onboardingStep--;
+   renderOnboardingModal();
+   }
+  }
+
+  function applyOnboardingTerminology() {
+   const preset = ONBOARDING_TERM_PRESETS[onboardingTermPreset];
+   if (preset && preset.terms) {
+   state.terminology = { ...state.terminology, ...preset.terms };
+   saveState();
+   }
+  }
+
+  function skipOnboarding() {
+   finishOnboarding();
+  }
+
+  function finishOnboarding() {
+   state.onboardingComplete = true;
+   saveState();
+   closeModal();
+   renderAll();
+  }
+
+  /* ============================================================
    INIT
   ============================================================ */
   (function init() {
@@ -7111,6 +7461,9 @@ function cancelReply() {
 
    console.log('6 navigate');
    navigate('dashboard');
+
+   console.log('6.5 onboarding check');
+   startOnboardingIfNeeded();
 
    console.log('7 done');
   })();
