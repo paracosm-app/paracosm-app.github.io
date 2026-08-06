@@ -6,7 +6,7 @@ hey! my name is ezra, and i'm the developer of Paracosm. Paracosm is a website m
 
 Paracosm is hosted on GitHub Pages, so there's nothing to install or clone. just visit the link below and start using it:
 
-🔗 **paracosm-app.github.io/landing**
+🔗 **paracosm-app.github.io/app**
 
 #### key features
 
