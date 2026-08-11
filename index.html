@@ -12,8 +12,101 @@
 </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <!-- EDIT: browser tab title -->
-  <title>Paracosm</title>
+  <title>Paracosm — A Free System Tracker for Plural Systems</title>
+
+  <!-- EDIT: primary SEO meta -->
+  <meta name="description" content="Paracosm is a free, private, local-first system tracker for plural systems. Manage alter profiles, log fronting history, use system boards, and import from PluralKit — no account required, nothing leaves your browser." />
+  <meta name="keywords" content="plural system tracker, system tracker, alter tracker, fronting tracker, plurality app, PluralKit alternative, PluralKit import, DID system app, tulpa tracker" />
+  <meta name="author" content="Paracosm" />
+  <meta name="robots" content="index, follow" />
+  <!-- EDIT: canonical URL — set to your actual deployed domain -->
+  <link rel="canonical" href="https://paracosm-app.github.io/" />
+
+  <!-- Open Graph / Facebook, Discord, etc. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Paracosm" />
+  <meta property="og:title" content="Paracosm — Free System Tracker for Plural Systems" />
+  <meta property="og:description" content="A private, local-first tool for tracking alters, fronting history, and system boards — all in your browser, no account needed." />
+  <meta property="og:url" content="https://paracosm-app.github.io/" />
+  <!-- EDIT: add a 1200x630 social preview image and point this at it -->
+  <meta property="og:image" content="https://paracosm-app.github.io/og-image.png" />
+
+  <!-- Twitter/X card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Paracosm — Free System Tracker for Plural Systems" />
+  <meta name="twitter:description" content="A private, local-first tool for tracking alters, fronting history, and system boards — all in your browser, no account needed." />
+  <meta name="twitter:image" content="https://paracosm-app.github.io/og-image.png" />
+
+  <!-- EDIT: replace with your own favicon files -->
+  <link rel="icon" type="image/png" href="/favicon.png" />
+
+  <!-- Structured data: helps search engines understand what the app is and surface FAQ rich results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Paracosm",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "Any (web browser)",
+    "description": "A private, local-first system tracker for plural systems: alter profiles, fronting history, system boards, and PluralKit import.",
+    "url": "https://paracosm-app.github.io/",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is my data private?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes — everything is stored in your browser's localStorage. Nothing is ever sent to a server. Only you can see it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need an account?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No account needed. Open the app and start using it."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I import from PluralKit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Paste in your PluralKit token, and pull in your alters."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Will I lose data if I clear my browser?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Clearing cookies/localStorage will delete your data. Use Settings → Export regularly to keep a JSON backup you can re-import."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Completely free and open source. You can donate to support development if you'd like, but there's no pressure and nothing is paywalled."
+        }
+      }
+    ]
+  }
+  </script>
   <style>
     :root {
       --accent: #7c6fcd;
@@ -370,7 +463,7 @@
           GitHub
         </a>
 
-        <a class="link-pill" href="YOUR_DONATE_LINK" target="_blank" rel="noopener">
+        <a class="link-pill" href="https://cash.app/$ezrapugliese" target="_blank" rel="noopener">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           Donate
         </a>
@@ -454,7 +547,7 @@
     <span class="sep">·</span>
     <a href="https://discord.gg/cMGz9dYxaS">Discord</a>
     <span class="sep">·</span>
-    <a href="YOUR_DONATE_LINK">Donate</a>
+    <a href="https://cash.app/$ezrapugliese">Donate</a>
     <span class="sep">·</span>
     <a href="https://www.patreon.com/Paracosm_App">Patreon</a>
     
