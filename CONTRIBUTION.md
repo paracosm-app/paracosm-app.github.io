@@ -13,7 +13,7 @@ so before you open a PR, ask yourself:
 - if this broke in production, would i know where to start looking?
 - did i actually test this myself, or am i just trusting that it "looks right"?
 
-if the answer to any of those is no, take some more time with it first. AI is a tool to help you write and understand code faster — not a replacement for understanding it. make sure you know what you're doing!
+if the answer to any of those is no, take some more time with it first. AI is a tool to help you write and understand code faster — not a replacement for understanding it. make sure you know what you're doing! Paracosm was made with love and human hands, not a computer.
 
 #### how to contribute
 
